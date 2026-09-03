@@ -2,8 +2,23 @@
 // FORESIGHT AI - FRONTEND ENGINE
 // ======================================================
 
-const API_BASE_URL = "https://foresight-ai-6mlt.onrender.com";
+const CONFIGURED_API_URL = "https://foresight-ai-6mlt.onrender.com";
+const API_TIMEOUT_MS = 60000;
+const API_RETRIES = 2;
 let forecastChart = null;
+
+// The dashboard can run as a standalone static site or from the unified
+// FastAPI service. Same-origin is preferred so priyadarshan.tech can host
+// both the UI and API without a hard dependency on a separate frontend host.
+function getApiCandidates() {
+    const candidates = [];
+    const sameOrigin = window.location.origin;
+
+    if (sameOrigin && sameOrigin !== "null") candidates.push(sameOrigin);
+    candidates.push(CONFIGURED_API_URL);
+
+    return [...new Set(candidates.filter(Boolean).map(url => url.replace(/\/$/, "")))];
+}
 
 // Project sales history used as input to the forecasting service.
 const salesHistory = [
@@ -38,23 +53,35 @@ const salesHistory = [
 ];
 
 async function apiRequest(endpoint, options = {}) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const candidates = getApiCandidates();
+    let lastError = new Error("Unable to reach the forecast service.");
 
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            ...options,
-            signal: controller.signal
-        });
+    for (const baseUrl of candidates) {
+        for (let attempt = 0; attempt < API_RETRIES; attempt += 1) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+            try {
+                const response = await fetch(`${baseUrl}${endpoint}`, {
+                    ...options,
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                lastError = error;
+                console.warn(`API request failed (${baseUrl}, attempt ${attempt + 1}):`, error);
+            } finally {
+                clearTimeout(timeout);
+            }
         }
-
-        return await response.json();
-    } finally {
-        clearTimeout(timeout);
     }
+
+    throw lastError;
 }
 
 async function getForecast() {
@@ -139,8 +166,25 @@ function updateDashboard(forecastData, inventoryData, insightData) {
     document.getElementById("insight").textContent = insightData.insight;
     document.getElementById("recommendation").textContent = insightData.recommended_action;
 
+    const decision = document.getElementById("inventoryDecision");
+    const decisionReason = document.getElementById("decisionReason");
+    if (decision) decision.textContent = String(inventoryData.decision || risk).toUpperCase();
+    if (decisionReason) decisionReason.textContent = inventoryData.recommendation || "Analysis completed.";
+
     const model = forecastData.forecast?.[0]?.model || "—";
     document.getElementById("forecastModel").textContent = `MODEL: ${model.toUpperCase()}`;
+
+    const evaluation = forecastData.evaluation?.[0];
+    const modelPerformance = document.getElementById("modelPerformance");
+    if (modelPerformance && evaluation?.available) {
+        modelPerformance.textContent = `${evaluation.model} · MAE ${evaluation.mae} · RMSE ${evaluation.rmse} · MAPE ${evaluation.mape ?? "—"}%`;
+    }
+
+    const salesRisk = document.getElementById("salesRisk");
+    const overstockCapital = document.getElementById("overstockCapital");
+    if (salesRisk) salesRisk.textContent = inventoryData.shortage_units ?? 0;
+    if (overstockCapital) overstockCapital.textContent = inventoryData.excess_units ?? 0;
+
     renderForecastList(forecastData);
 }
 
@@ -159,6 +203,10 @@ function renderForecastList(forecastData) {
 function renderForecastChart(forecastData) {
     const canvas = document.getElementById("forecastChart");
     if (!canvas) return;
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js failed to load.");
+        return;
+    }
     if (forecastChart) forecastChart.destroy();
 
     const historicalMap = {};
@@ -230,7 +278,7 @@ function renderForecastChart(forecastData) {
 async function initializeDashboard() {
     const button = document.getElementById("generateBtn");
     button.disabled = true;
-    button.innerHTML = "⟳ Generating Forecast...";
+    button.innerHTML = "⟳ Connecting to Forecast Engine...";
     setApiStatus("checking");
 
     try {
@@ -258,12 +306,12 @@ async function initializeDashboard() {
         console.error(error);
         setApiStatus("unavailable");
         document.getElementById("insight").textContent = error.name === "AbortError"
-            ? "The forecast service took too long to respond. Please try again."
+            ? "The forecast service is waking up or taking longer than expected. Please try again."
             : error.message || "Unable to complete the analysis.";
-        document.getElementById("recommendation").textContent = "Check the service connection and try again.";
+        document.getElementById("recommendation").textContent = "The dashboard will retry the service connection automatically when you generate again.";
     } finally {
         button.disabled = false;
-        button.innerHTML = `✦ Generate Forecast <span>→</span>`;
+        button.innerHTML = `✦ Generate AI Forecast <span>→</span>`;
     }
 }
 
