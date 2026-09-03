@@ -56,7 +56,7 @@ If the backend is temporarily unavailable, the UI intentionally switches to **DE
 
 - Repository: `https://github.com/darshxn10x/foresight-ai`
 - Live deployment: `https://foresight-ai-6mlt.onrender.com`
-- Custom domain: `https://priyadarshan.tech` (verify before submitting)
+- Custom domain: `https://priyadarshan.tech` 
 
 ## Demo rule
 
