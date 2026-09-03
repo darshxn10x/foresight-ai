@@ -1,0 +1,202 @@
+sku_id,category,subcategory,launch_date,unit_cost,list_price
+SKU-001,Home Décor,Lighting,2023-08-17,575.03,1145.76
+SKU-002,Small Appliances,Blenders,2024-07-12,7470.83,12986.92
+SKU-003,Bedding & Bath,Bed Sheets,2023-04-06,2807.67,4265.05
+SKU-004,Kitchen & Dining,Dinnerware,2024-07-28,1623.71,2924.32
+SKU-005,Furnishings,Bedroom,2024-03-05,21326.46,43096.4
+SKU-006,furnishings,Rugs,2023-01-07,1847.63,3685.53
+SKU-007,Small Appliances,Blenders,2023-06-09,7175.67,11266.7
+SKU-008,Bedding & Bath,Duvets,2023-04-05,4054.52,6900.62
+SKU-009,Kitchen & Dining,Cutlery,2024-09-10,1025.55,1972.9
+SKU-010,Furnishings,Accent Furniture,2024-07-03,23467.51,47823.01
+SKU-011,Home Décor,Lighting,2024-07-19,3419.35,7060.87
+SKU-012,Small Appliances,Air Purifiers,2024-01-06,8186.42,13992.72
+SKU-013,HOME DÉCOR,Duvets,2023-08-22,3195.54,4881.17
+SKU-014,Kitchen & Dining,Glassware,2023-04-14,4934.97,9512.94
+SKU-015,Furnishings,Home Office,2024-01-09,11032.38,21859.68
+SKU-016,Home Décor,Rugs,2023-10-01,1610.54,3135.17
+SKU-017,Small Appliances,Coffee Makers,2023-09-08,6490.31,9641.81
+SKU-018,Bedding & Bath,Duvets,2024-10-17,2371.68,3941.66
+  SKU-019 ,Kitchen & Dining,Dinnerware,2023-02-27,3612.3,6940.77
+SKU-020,Furnishings,Bedroom,2024-02-15,23812.36,49601.8
+SKU-021,Home Décor,Wall Art,2024-08-03,698.57,1703.95
+SKU-022,Small Appliances,Air Purifiers,2024-10-20,3437.22,5670.09
+SKU-023,Bedding & Bath,Pillows,2024-07-28,1285.76,2036.36
+SKU-024,Kitchen & Dining,Glassware,2024-08-20,3886.86,6662.92
+SKU-025,Furnishings,Home Office,2023-05-22,13006.92,28594.35
+SKU-026,small appliances,Vases & Accents,2023-04-23,772.73,1416.4
+SKU-027,Small Appliances,Blenders,2024-03-08,6631.33,11910.13
+SKU-028,Bedding & Bath,Bed Sheets,2024-04-24,2108.21,3916.07
+SKU-029,Kitchen & Dining,Glassware,2023-01-12,4872.74,9406.29
+SKU-030,Furnishings,Living Room,2023-10-01,20520.19,39443.54
+SKU-031,Home Décor,Wall Art,2024-04-09,834.66,1756.4
+SKU-032,Small Appliances,Coffee Makers,2023-09-27,9144.38,16806.7
+SKU-033   ,Bedding & Bath,Duvets,2024-10-02,2526.12,3950.46
+SKU-034,Kitchen & Dining,Glassware,2023-07-23,4303.35,7547.35
+SKU-035,Furnishings,Bedroom,2024-06-27,13286.98,22547.07
+SKU-036,Home Décor,Lighting,2023-04-25,2296.83,4919.86
+SKU-037,Small Appliances,Air Purifiers,2023-11-11,8566.16,15554.71
+SKU-038,Bedding & Bath,Duvets,2023-03-22,996.95,2020.62
+SKU-039,Kitchen & Dining,Cookware,2024-06-29,3820.39,7289.35
+SKU-040,Furnishings,Bedroom,2024-07-16,7517.2,14171.2
+SKU-041,Home Décor,Rugs,2024-03-09,1295.17,3122.27
+SKU-042,Small Appliances,Blenders,2023-07-25,8952.63,15914.49
+SKU-043,Bedding & Bath,Towels,2024-01-18,2156.57,4103.98
+SKU-044,Kitchen & Dining,Cutlery,2023-09-11,4558.3,7866.45
+SKU-045,Furnishings,Bedroom,2024-07-21,6004.61,9683.16
+SKU-046,Home Décor,Rugs,2024-10-08,-120.0,4088.98
+SKU-047,Small Appliances,Coffee Makers,2023-12-05,3562.85,6600.93
+SKU-048,Bedding & Bath,Bed Sheets,2024-05-12,2548.13,4247.95
+SKU-049,Kitchen & Dining,Dinnerware,2024-08-07,2972.63,5534.07
+SKU-050,Furnishings,Home Office,2024-02-21,10210.44,19234.26
+SKU-051,Home Décor,Rugs,2023-12-29,782.98,1770.54
+SKU-052,Small Appliances,Toasters,2023-02-25,4965.49,9096.37
+SKU-053,Bedding & Bath,Bed Sheets,2023-04-22,1006.08,1948.7
+SKU-054,Kitchen & Dining,Dinnerware,2023-05-24,1443.0,2551.43
+SKU-055,Furnishings,Home Office,2023-03-19,8811.97,16545.15
+SKU-056,Home Décor,Vases & Accents,2023-04-11,2924.07,7015.36
+SKU-057,Small Appliances,Coffee Makers,2023-01-16,6821.52,11393.94
+SKU-058,Bedding & Bath,Bed Sheets,2023-06-20,3949.65,7935.71
+SKU-059,Kitchen & Dining,Cutlery,2024-02-15,2736.82,4397.72
+SKU-060,Furnishings,Living Room,2024-02-04,8368.97,13401.17
+SKU-061,Home Décor,Wall Art,2023-10-20,10017.28,7705.6
+SKU-062,Small Appliances,Toasters,2024-07-23,7163.75,12645.83
+SKU-063,Bedding & Bath,Pillows,2023-03-01,1326.31,2225.58
+SKU-064,Kitchen & Dining,Cookware,2024-08-21,3891.09,5947.85
+SKU-065,Furnishings,Home Office,2023-06-11,16316.98,34455.46
+SKU-066,Home Décor,Lighting,2023-07-10,3382.34,6277.89
+SKU-067,Small Appliances,Coffee Makers,2023-08-29,6381.77,11089.0
+SKU-068,Bedding & Bath,Pillows,2023-09-10,1207.61,2456.49
+SKU-069,Kitchen & Dining,Cookware,2024-08-20,3325.28,5684.94
+SKU-070,Furnishings,Accent Furniture,2023-11-18,26465.6,45588.47
+SKU-071,Home Décor,Rugs,2024-10-22,1296.84,2453.12
+SKU-072,Small Appliances,Air Purifiers,2023-03-16,5320.63,9920.36
+SKU-073,Bedding & Bath,Bed Sheets,2023-04-13,2358.17,4949.97
+SKU-074,Kitchen & Dining,Cookware,2023-05-16,2965.59,5198.51
+SKU-075,Furnishings,Accent Furniture,2024-01-14,25200.31,53615.23
+SKU-076,Home Décor,Wall Art,2023-11-06,973.24,2319.84
+SKU-077,Small Appliances,Coffee Makers,2024-11-10,6942.55,11644.75
+SKU-078,Bedding & Bath,Bed Sheets,2023-04-29,3992.36,6310.22
+SKU-079,Kitchen & Dining,Cookware,2023-10-16,3866.63,6100.47
+SKU-080,Furnishings,Bedroom,2024-10-11,21363.89,36792.0
+SKU-081,Home Décor,Wall Art,2023-02-22,2016.23,3983.64
+SKU-082,Small Appliances,Coffee Makers,2023-02-15,6683.99,12129.26
+SKU-083,Bedding & Bath,Bed Sheets,2023-09-26,1934.09,3052.95
+SKU-084,Kitchen & Dining,Dinnerware,2024-03-13,3861.42,6857.26
+SKU-085,Furnishings,Living Room,2023-06-02,7129.04,15448.85
+SKU-086,Home Décor,Lighting,2023-06-01,3003.79,6631.64
+SKU-087,Small Appliances,Toasters,2023-02-10,2781.33,4322.55
+SKU-088,Bedding & Bath,Towels,2023-04-16,1514.26,2498.1
+SKU-089,Kitchen & Dining,Glassware,2024-02-21,4032.51,7831.41
+SKU-090,Furnishings,Bedroom,2023-06-16,26255.45,45738.11
+SKU-091,Home Décor,Rugs,2023-12-07,3144.25,5714.2
+SKU-092,Small Appliances,Toasters,2023-09-12,7977.21,14614.5
+SKU-093,Bedding & Bath,Towels,2024-01-27,1341.27,2576.27
+SKU-094,Kitchen & Dining,Cookware,2024-04-16,4377.81,7053.6
+SKU-095,Furnishings,Accent Furniture,2023-08-22,11671.99,24245.14
+SKU-096,Home Décor,Rugs,2023-12-03,570.99,1104.97
+SKU-097,Small Appliances,Air Purifiers,2023-10-13,8455.52,15925.5
+SKU-098,Bedding & Bath,Towels,2024-07-03,2981.04,5186.43
+SKU-099,Kitchen & Dining,Glassware,2023-09-25,4732.64,7371.9
+SKU-100,Furnishings,Bedroom,2023-02-09,18143.86,39737.42
+SKU-101,Home Décor,Lighting,2023-11-18,2289.71,4675.54
+SKU-102,Small Appliances,Toasters,2024-01-30,6467.81,10708.83
+SKU-103,Bedding & Bath,Duvets,2023-01-02,1666.06,3207.62
+SKU-104,Kitchen & Dining,Dinnerware,2024-11-11,2202.57,3380.92
+SKU-105,Furnishings,Accent Furniture,2023-05-08,19144.15,38250.63
+SKU-106,Home Décor,Wall Art,2023-12-01,2021.37,4582.09
+SKU-107,Small Appliances,Toasters,2023-07-16,7168.5,12023.05
+SKU-108,Bedding & Bath,Pillows,2023-06-28,3060.76,5287.42
+SKU-109,Kitchen & Dining,Glassware,2023-11-08,2386.73,4575.03
+SKU-110,Furnishings,Accent Furniture,2024-09-13,9439.29,19553.07
+SKU-111,Home Décor,Wall Art,2023-08-07,1894.96,3997.44
+SKU-112,Small Appliances,Toasters,2023-06-23,7911.76,14873.44
+SKU-113,Bedding & Bath,Bed Sheets,2024-09-26,1764.87,3350.27
+SKU-114,Kitchen & Dining,Glassware,2023-08-29,1010.9,1997.54
+SKU-115,Furnishings,Accent Furniture,2023-01-26,9779.06,16814.88
+SKU-116,Home Décor,Lighting,2023-03-16,1234.53,2632.75
+SKU-117,Small Appliances,Toasters,2023-07-19,4991.2,8559.32
+SKU-118,Bedding & Bath,Pillows,2024-11-02,2480.88,4084.5
+SKU-119,Kitchen & Dining,Cookware,2023-04-20,4527.7,8739.46
+SKU-120,Furnishings,Home Office,2024-06-14,9642.77,20080.74
+SKU-121,Home Décor,Vases & Accents,2023-05-05,650.66,1284.69
+SKU-122,Small Appliances,Toasters,2024-06-27,2826.71,4614.1
+SKU-123,Bedding & Bath,Towels,2024-09-19,4030.13,8200.73
+SKU-124,Kitchen & Dining,Cutlery,2023-06-12,4254.5,7547.21
+SKU-125,Furnishings,Home Office,2024-10-14,15076.64,30923.18
+SKU-126,Home Décor,Wall Art,2024-10-03,2797.44,6056.21
+SKU-127,Small Appliances,Blenders,2023-10-20,3914.4,5631.81
+SKU-128,Bedding & Bath,Duvets,2024-07-07,1723.83,2916.42
+SKU-129,Kitchen & Dining,Cookware,2023-06-06,1208.85,1953.06
+SKU-130,Furnishings,Bedroom,2024-07-09,6009.38,11084.66
+SKU-131,Home Décor,Vases & Accents,2024-03-06,1747.32,3398.16
+SKU-132,Small Appliances,Toasters,2023-01-21,8767.26,14834.55
+SKU-133,Bedding & Bath,Pillows,2023-11-02,2421.73,5002.43
+SKU-134,Kitchen & Dining,Cutlery,2024-03-05,4355.17,8608.93
+SKU-135,Furnishings,Bedroom,2024-05-12,15973.39,28173.25
+SKU-136,Home Décor,Lighting,2024-02-19,1666.57,3780.13
+SKU-137,Small Appliances,Blenders,2024-09-29,8271.89,15383.82
+SKU-138,Bedding & Bath,Bed Sheets,2024-11-09,3883.56,7204.53
+SKU-139,Kitchen & Dining,Cookware,2024-04-17,969.37,1661.8
+SKU-140,Furnishings,Bedroom,2023-08-05,5681.69,10383.07
+SKU-141,Home Décor,Vases & Accents,2024-01-24,1480.54,3453.89
+SKU-142,Small Appliances,Air Purifiers,2023-09-16,7590.48,13784.02
+SKU-143,Bedding & Bath,Bed Sheets,2023-02-23,2399.04,4676.72
+SKU-144,Kitchen & Dining,Glassware,2024-10-29,1586.58,2434.3
+SKU-145,Furnishings,Living Room,2023-07-24,22224.48,48221.94
+SKU-146,Home Décor,Lighting,2024-04-29,2364.01,4649.96
+SKU-147,Small Appliances,Coffee Makers,2023-09-20,6142.57,9269.03
+SKU-148,Bedding & Bath,Towels,2023-04-28,1370.48,2555.05
+SKU-149,Kitchen & Dining,Dinnerware,2023-01-27,4844.77,7529.01
+SKU-150,Furnishings,Accent Furniture,2024-01-20,18031.22,38673.64
+SKU-151,Home Décor,Vases & Accents,2024-08-29,3324.41,6445.47
+SKU-152,Small Appliances,Blenders,2024-12-01,2584.64,4616.79
+SKU-153,Bedding & Bath,Bed Sheets,2023-02-12,3507.17,6451.65
+SKU-154,Kitchen & Dining,Glassware,2023-03-12,2944.08,5389.91
+SKU-155,Furnishings,Accent Furniture,2024-05-16,4797.33,8884.82
+SKU-156,Home Décor,Lighting,2024-04-15,1800.57,3697.53
+SKU-157,Small Appliances,Blenders,2024-10-28,5153.25,9105.27
+SKU-158,Bedding & Bath,Towels,2024-05-10,2894.1,5938.03
+SKU-159,Kitchen & Dining,Cutlery,2023-10-02,2516.53,4694.62
+SKU-160,Furnishings,Accent Furniture,2023-03-30,24515.26,51443.77
+SKU-161,Home Décor,Wall Art,2024-04-20,3144.89,6197.65
+SKU-162,Small Appliances,Toasters,2023-11-29,4390.25,7231.41
+SKU-163,Bedding & Bath,Duvets,2023-09-22,2457.67,4209.73
+SKU-164,Kitchen & Dining,Glassware,2023-10-10,1830.5,3291.38
+SKU-165,Furnishings,Living Room,2023-09-05,16640.74,28532.78
+SKU-166,Home Décor,Vases & Accents,2024-05-02,1965.73,4581.56
+SKU-167,Small Appliances,Toasters,2023-10-29,5250.94,7396.59
+SKU-168,Bedding & Bath,Duvets,2024-11-10,2174.96,3579.95
+SKU-169,Kitchen & Dining,Glassware,2024-03-11,2682.35,4735.58
+SKU-170,Furnishings,Accent Furniture,2023-11-10,12767.55,23904.01
+SKU-171,Home Décor,Wall Art,2023-11-20,1191.61,2746.54
+SKU-172,Small Appliances,Coffee Makers,2023-07-09,7520.18,14103.64
+SKU-173,Bedding & Bath,Duvets,2024-08-26,1535.71,2749.72
+SKU-174,Kitchen & Dining,Glassware,2023-10-31,4914.25,9417.25
+SKU-175,Furnishings,Bedroom,2024-06-30,12980.71,23123.32
+SKU-176,Home Décor,Rugs,2024-07-20,1322.93,3283.52
+SKU-177,Small Appliances,Air Purifiers,2024-05-17,7170.11,10490.87
+SKU-178,Bedding & Bath,Bed Sheets,2024-04-25,3767.25,6948.46
+SKU-179,Kitchen & Dining,Cutlery,2023-02-22,2538.06,4041.05
+SKU-180,Furnishings,Accent Furniture,2023-03-08,26614.99,50212.84
+SKU-181,Home Décor,Vases & Accents,2023-02-24,1975.24,4353.26
+SKU-182,Small Appliances,Blenders,2023-11-08,2948.82,4958.2
+SKU-183,Bedding & Bath,Bed Sheets,2024-03-02,4179.32,6566.01
+SKU-184,Kitchen & Dining,Dinnerware,2024-03-29,4013.05,6782.81
+SKU-185,Furnishings,Accent Furniture,2023-11-09,24713.92,54222.8
+SKU-186,Home Décor,Lighting,2023-08-01,2328.89,5398.51
+SKU-187,Small Appliances,Blenders,2023-09-03,3837.78,5528.68
+SKU-188,Bedding & Bath,Duvets,2024-02-23,2676.77,4266.56
+SKU-189,Kitchen & Dining,Cutlery,2023-02-03,3633.23,6303.5
+SKU-190,Furnishings,Bedroom,2024-04-09,11270.46,19944.56
+SKU-191,Home Décor,Lighting,2024-10-02,2562.15,6268.91
+SKU-192,Small Appliances,Blenders,2024-10-25,5073.57,8484.44
+SKU-193,Bedding & Bath,Duvets,2023-03-15,3888.6,7761.56
+SKU-194,Kitchen & Dining,Cookware,2024-08-05,1330.06,2199.66
+SKU-195,Furnishings,Accent Furniture,2023-11-08,14820.11,27879.87
+SKU-196,Home Décor,Vases & Accents,2024-05-20,3328.03,7156.36
+SKU-197,Small Appliances,Toasters,2024-03-18,2419.4,3435.38
+SKU-198,Bedding & Bath,Towels,2023-08-23,2852.63,4323.21
+SKU-199,Kitchen & Dining,Cookware,2023-10-03,4998.12,9177.25
+SKU-200,Furnishings,Living Room,2024-06-15,22433.06,38250.93
+SKU-011,Home Décor,Lighting,2024-07-19,3419.35,7060.87

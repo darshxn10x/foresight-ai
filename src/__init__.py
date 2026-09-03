@@ -1,0 +1,3 @@
+"""
+Foresight AI source package.
+"""

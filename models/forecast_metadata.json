@@ -1,0 +1,113 @@
+{
+  "model_version": "1.0.0",
+  "model_type": "LightGBM Regressor",
+  "trained_timestamp": "2026-09-03 15:23:13",
+  "horizon_weeks": 6,
+  "num_skus_forecasted": 195,
+  "feature_count": 26,
+  "features": [
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "lag_4",
+    "lag_8",
+    "lag_12",
+    "rolling_mean_4",
+    "rolling_std_4",
+    "rolling_min_4",
+    "rolling_max_4",
+    "rolling_mean_8",
+    "rolling_mean_12",
+    "momentum_4_vs_8",
+    "week_of_year",
+    "month",
+    "quarter",
+    "sin_week",
+    "cos_week",
+    "promo_flag",
+    "is_holiday",
+    "unit_cost",
+    "list_price",
+    "gross_margin_pct",
+    "category",
+    "subcategory",
+    "season"
+  ],
+  "cross_validation": {
+    "num_folds": 4,
+    "baseline_overall": {
+      "wape": 13.68,
+      "bias": 3.6,
+      "mae": 12.89,
+      "rmse": 28.46,
+      "mape": 33.13
+    },
+    "lgb_overall": {
+      "wape": 11.12,
+      "bias": 3.17,
+      "mae": 10.48,
+      "rmse": 26.44,
+      "mape": 29.84
+    },
+    "wape_improvement_pct": 18.71,
+    "folds": [
+      {
+        "fold": 1,
+        "train_window": "2025-02-02 to 2026-01-18 (51 wks)",
+        "test_window": "2026-01-25 to 2026-03-01 (6 wks)",
+        "test_observations": 1170,
+        "baseline_wape": 10.79,
+        "baseline_bias": 2.02,
+        "baseline_rmse": 16.33,
+        "lgb_wape": 7.88,
+        "lgb_bias": 0.39,
+        "lgb_rmse": 11.66,
+        "wape_diff": 2.91
+      },
+      {
+        "fold": 2,
+        "train_window": "2025-02-02 to 2026-03-01 (57 wks)",
+        "test_window": "2026-03-08 to 2026-04-12 (6 wks)",
+        "test_observations": 1170,
+        "baseline_wape": 10.46,
+        "baseline_bias": -0.85,
+        "baseline_rmse": 15.77,
+        "lgb_wape": 7.95,
+        "lgb_bias": -0.83,
+        "lgb_rmse": 11.47,
+        "wape_diff": 2.51
+      },
+      {
+        "fold": 3,
+        "train_window": "2025-02-02 to 2026-04-12 (63 wks)",
+        "test_window": "2026-04-19 to 2026-05-24 (6 wks)",
+        "test_observations": 1170,
+        "baseline_wape": 10.16,
+        "baseline_bias": 0.02,
+        "baseline_rmse": 14.4,
+        "lgb_wape": 7.78,
+        "lgb_bias": 0.0,
+        "lgb_rmse": 11.3,
+        "wape_diff": 2.38
+      },
+      {
+        "fold": 4,
+        "train_window": "2025-02-02 to 2026-05-24 (69 wks)",
+        "test_window": "2026-05-31 to 2026-07-05 (6 wks)",
+        "test_observations": 1170,
+        "baseline_wape": 24.82,
+        "baseline_bias": 14.69,
+        "baseline_rmse": 50.16,
+        "lgb_wape": 22.39,
+        "lgb_bias": 14.67,
+        "lgb_rmse": 49.0,
+        "wape_diff": 2.43
+      }
+    ]
+  },
+  "uncertainty_calibration": {
+    "residual_std": 26.27,
+    "residual_q10": -14.66,
+    "residual_q90": 11.75
+  }
+}

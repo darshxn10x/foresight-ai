@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Foresight AI</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div>
+            <h1>Foresight AI</h1>
+            <p>Demand Forecasting & Inventory Intelligence</p>
+        </div>
+
+        <div class="status">
+            <span></span>
+            API Online
+        </div>
+    </header>
+
+
+    <main>
+
+        <section class="hero">
+            <div>
+                <h2>Inventory Intelligence Dashboard</h2>
+                <p>
+                    Predict demand, identify inventory risks,
+                    and make smarter replenishment decisions.
+                </p>
+            </div>
+        </section>
+
+        <section class="control-panel">
+
+    <div class="control-header">
+        <div>
+            <h2>Forecast Controls</h2>
+            <p>Enter inventory details to generate an updated forecast.</p>
+        </div>
+    </div>
+
+    <div class="control-grid">
+
+        <div class="input-group">
+            <label for="skuInput">SKU ID</label>
+            <input
+                type="text"
+                id="skuInput"
+                value="SKU001"
+                placeholder="Enter SKU ID"
+            >
+        </div>
+
+        <div class="input-group">
+            <label for="stockInput">Current Stock</label>
+            <input
+                type="number"
+                id="stockInput"
+                value="15"
+                min="0"
+                placeholder="Current stock"
+            >
+        </div>
+
+        <div class="input-group">
+            <label for="leadTimeInput">Lead Time (Days)</label>
+            <input
+                type="number"
+                id="leadTimeInput"
+                value="7"
+                min="0"
+                placeholder="Lead time"
+            >
+        </div>
+
+        <div class="input-group">
+            <label for="safetyStockInput">Safety Stock</label>
+            <input
+                type="number"
+                id="safetyStockInput"
+                value="10"
+                min="0"
+                placeholder="Safety stock"
+            >
+        </div>
+
+    </div>
+
+    <button id="generateBtn" class="generate-btn">
+        Generate Forecast
+    </button>
+
+</section>
+        <section class="cards">
+
+            <div class="card">
+                <p>SKU</p>
+                <h3 id="sku">SKU001</h3>
+            </div>
+
+            <div class="card">
+                <p>Current Stock</p>
+                <h3 id="stock">--</h3>
+            </div>
+
+            <div class="card">
+                <p>Predicted Demand</p>
+                <h3 id="demand">--</h3>
+            </div>
+
+            <div class="card">
+                <p>Risk Level</p>
+                <h3 id="risk">--</h3>
+            </div>
+
+        </section>
+
+
+        <section class="dashboard-grid">
+
+            <div class="panel">
+
+                <h2>Inventory Analysis</h2>
+
+                <div class="metric">
+                    <span>Reorder Point</span>
+                    <strong id="reorderPoint">--</strong>
+                </div>
+
+                <div class="metric">
+                    <span>Recommended Order</span>
+                    <strong id="recommendedOrder">--</strong>
+                </div>
+
+                <div class="metric">
+                    <span>Safety Stock</span>
+                    <strong id="safetyStock">--</strong>
+                </div>
+
+            </div>
+
+
+            <div class="panel insight-panel">
+
+                <h2>AI Insight</h2>
+
+                <p id="insight">
+                    Loading AI analysis...
+                </p>
+
+                <div class="recommendation">
+                    <strong>Recommended Action</strong>
+
+                    <p id="recommendation">
+                        Loading recommendation...
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="panel forecast-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Demand Forecast</h2>
+                    <p>Upcoming predicted demand</p>
+                </div>
+
+                <span id="forecastModel">
+                    Model: --
+                </span>
+
+            </div>
+            <div class="forecast-chart">
+                <canvas id="forecastChart"></canvas>
+            </div>
+
+            <div id="forecastList" class="forecast-list">
+                Loading forecast...
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
