@@ -1,54 +1,48 @@
 # Foresight AI — Supply Intelligence
 
-Foresight AI is a demand forecasting and inventory decision-support platform for SKU-level retail operations. It combines machine-learning forecasts with inventory rules to turn sales history into practical replenishment decisions and business-impact metrics.
+Foresight AI is a demand forecasting and inventory decision-support platform for SKU-level retail operations. It combines time-series forecasting with inventory rules to turn sales history into practical replenishment decisions and business-impact metrics.
 
-**Live application:** https://foresight-ai-6mlt.onrender.com  
-**Custom domain:** https://priyadarshan.tech
+**Live application:** https://priyadarshan.tech  
+**Repository:** https://github.com/darshxn10x/foresight-ai
 
 ## Overview
 
-Foresight connects the complete planning workflow:
+Foresight connects the planning workflow:
 
 **Historical Sales → Forecast → Validation → Inventory Risk → Reorder Decision → Business Impact**
 
 ## Features
 
 - SKU-level weekly demand forecasting
-- LightGBM forecasting model with Seasonal Naive benchmark
-- Rolling-origin time-series validation
-- WAPE, Bias, MAPE, MAE and RMSE evaluation
-- Prediction intervals for uncertainty-aware planning
+- Random Forest forecasting with trend and lag features
+- Seasonal Naive and trend fallback methods for limited data
+- Time-aware holdout evaluation with MAE, RMSE and MAPE
 - Reorder-point and replenishment recommendations
-- Stockout and overstock risk detection
-- Operational states: **REORDER NOW, MARKDOWN / CLEAR, WATCH / VOLATILE, HEALTHY**
-- Sales-at-risk, overstock capital and replenishment-cost calculations
-- Interactive forecasting and inventory dashboard
-- Dashboard-aware AI assistant for operational questions
-- FastAPI backend with a lightweight web frontend
+- Stockout, overstock and watch-state detection
+- Sales-at-risk and excess-inventory calculations
+- Interactive demand forecast visualization
+- Dashboard-aware inventory assistant
+- FastAPI backend with a lightweight production web dashboard
+- Unified deployment option for frontend and API on one Render web service
 
-## Model
+## Forecasting
 
-The forecasting pipeline uses time-aware validation to avoid future-data leakage. LightGBM is evaluated against a Seasonal Naive baseline and selected based on out-of-sample performance.
+The forecasting service aggregates daily sales into weekly demand, removes incomplete current weeks, creates lag/rolling features and selects an appropriate forecasting approach based on available history.
 
-Current validation snapshot:
+For sufficient history, the current implementation uses a `RandomForestRegressor`. With limited history it falls back to a hybrid trend/seasonal approach so the dashboard remains usable without pretending that insufficient data supports a complex model.
 
-| Metric | Seasonal Naive | LightGBM |
-|---|---:|---:|
-| WAPE | 13.68% | **11.12%** |
-| Bias | +3.60% | **+3.17%** |
-| RMSE | 28.46 | **26.44** |
-| MAE | 12.89 | **10.48** |
+The API also returns a simple out-of-sample evaluation for the active SKU using MAE, RMSE and MAPE where available.
 
 ## Inventory Decision Engine
 
 Forecast output is translated into an operational recommendation using projected demand, available stock, supplier lead time and safety stock.
 
-- **REORDER NOW** — stock is below the reorder point
+- **REORDER NOW** — stock is below the required reorder level
 - **MARKDOWN / CLEAR** — inventory materially exceeds projected demand
 - **WATCH / VOLATILE** — inventory is close to projected demand
 - **HEALTHY** — inventory is aligned with demand and buffer requirements
 
-The platform also estimates the financial exposure associated with inventory shortages, excess stock and recommended replenishment.
+The platform estimates the financial exposure associated with shortages and excess stock when SKU pricing data is available.
 
 ## AI Assistant
 
@@ -57,21 +51,23 @@ The platform also estimates the financial exposure associated with inventory sho
 ## Architecture
 
 ```text
-Sales Data + SKU Master
-        ↓
-Data Preparation & Feature Engineering
-        ↓
-LightGBM Forecast + Seasonal Naive Benchmark
-        ↓
-Time-Series Validation
-        ↓
+Sales History
+     ↓
+Weekly Aggregation & Data Preparation
+     ↓
+Feature Engineering
+     ↓
+Forecast Model / Baseline Fallback
+     ↓
+Forecast Evaluation
+     ↓
 Inventory Risk & Replenishment Engine
-        ↓
+     ↓
 Business Impact Calculations
-        ↓
-FastAPI Backend
-        ↓
-Foresight AI Web Dashboard + Assistant
+     ↓
+FastAPI
+     ↓
+Foresight AI Dashboard + Assistant
 ```
 
 ## Tech Stack
@@ -79,8 +75,8 @@ Foresight AI Web Dashboard + Assistant
 - Python
 - Pandas / NumPy
 - Scikit-learn
-- LightGBM
 - FastAPI
+- Pydantic
 - Joblib
 - HTML / CSS / JavaScript
 - Chart.js
@@ -90,13 +86,16 @@ Foresight AI Web Dashboard + Assistant
 
 ```text
 foresight-ai/
-├── backend/        # FastAPI services
-├── frontend/       # Web dashboard and assistant
-├── data/            # Source and processed datasets
-├── models/          # Forecasting artifacts
-├── src/             # Forecasting and data pipeline code
-├── reports/         # Model validation utility
+├── backend/        # FastAPI application and API routes
+├── frontend/       # Production dashboard and assistant
+├── data/           # Source and processed datasets
+├── models/         # Forecasting artifacts
+├── src/             # Data and forecasting utilities
+├── reports/         # Validation utilities
 ├── tests/           # Automated tests
+├── render.yaml      # Production Render service configuration
+├── LICENSE
+├── COPYRIGHT.md
 ├── .gitignore
 └── README.md
 ```
@@ -105,19 +104,34 @@ foresight-ai/
 
 ### Backend
 
+From the repository root:
+
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+pip install -r backend/requirements.txt
+uvicorn backend.main:app --reload
 ```
 
-### Frontend
+The API is available at `http://localhost:8000` and the dashboard is served from the same FastAPI application.
 
-Serve the `frontend` directory with any static web server and configure the frontend API endpoint to point to the FastAPI service.
+### Production
 
-## Repository
+The repository includes a Render Blueprint configuration with:
 
-https://github.com/darshxn10x/foresight-ai
+```text
+Build: pip install -r backend/requirements.txt
+Start: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+Health check: /health
+```
+
+The application serves both the dashboard and API from one web service, which removes the frontend/API deployment split that can otherwise cause connection and chart failures.
+
+## License
+
+This project is distributed under the MIT License. See `LICENSE` for the full license text.
+
+## Copyright
+
+Copyright © 2026 Priyadarshan. All rights reserved except where permissions are expressly granted by the project license.
 
 ---
 
