@@ -9,11 +9,9 @@
     const style = document.createElement("style");
     style.id = "foresightRuntimeStyles";
     style.textContent = `
-      .api-status.runtime-offline { border-color:#4a3030; background:#241415; color:#ff9a9a; }
-      .api-status.runtime-offline span { background:#ff6f78; box-shadow:0 0 10px rgba(255,111,120,.45); }
+      /* Backend unavailable is a supported demo state — never present it as an error. */
       .api-status.runtime-demo { border-color:#5a4622; background:#211b10; color:#ffc65f; }
       .api-status.runtime-demo span { background:#ffb83f; box-shadow:0 0 10px rgba(255,184,63,.4); }
-      .system-status.runtime-offline .status-dot { background:#ff6f78; box-shadow:0 0 12px rgba(255,111,120,.45); }
       .system-status.runtime-demo .status-dot { background:#ffb83f; box-shadow:0 0 12px rgba(255,184,63,.4); }
       .ready-badge.runtime-demo { border-color:#5a4622; color:#ffc65f; background:#211b10; }
       .live-badge.runtime-demo { border-color:#5a4622; color:#ffc65f; background:#211b10; }
@@ -48,7 +46,7 @@
     if (ready) {
       ready.classList.toggle("runtime-demo", mode !== "online");
       ready.innerHTML = mode === "online" ? "<span></span>LIVE READY" : "<span></span>DEMO READY";
-      ready.title = mode === "online" ? "Backend forecast engine is reachable." : "Demo calculations remain available while the backend is offline.";
+      ready.title = mode === "online" ? "Backend forecast engine is reachable." : "Demo calculations remain available while the backend is temporarily unavailable.";
     }
     if (live) {
       live.classList.toggle("runtime-demo", mode !== "online");
@@ -65,32 +63,30 @@
     const systemDetail = document.getElementById("systemStatusDetail");
     if (!badge || !label) return;
 
+    /* Normalize any connectivity failure to the polished demo state. */
+    const normalizedMode = mode === "online" ? "online" : "demo";
     badge.classList.remove("runtime-offline", "runtime-demo");
-    updateModeBadges(mode);
+    updateModeBadges(normalizedMode);
 
-    if (mode === "online") {
+    if (normalizedMode === "online") {
       label.textContent = "API CONNECTED";
       badge.title = "Foresight backend is reachable.";
       if (systemLabel) systemLabel.textContent = "System Online";
       if (systemDetail) systemDetail.textContent = detail || "Live forecast engine connected";
       if (system) system.classList.remove("runtime-offline", "runtime-demo");
-    } else if (mode === "demo") {
-      label.textContent = "DEMO FALLBACK";
-      badge.classList.add("runtime-demo");
-      badge.title = "The dashboard is using its deterministic demo path.";
-      if (systemLabel) systemLabel.textContent = "Demo Mode";
-      if (systemDetail) systemDetail.textContent = "Using deterministic fallback data";
-      if (system) { system.classList.remove("runtime-offline"); system.classList.add("runtime-demo"); }
     } else {
-      label.textContent = "API OFFLINE";
-      badge.classList.add("runtime-offline");
-      badge.title = "Backend health check failed; demo fallback remains available.";
-      if (systemLabel) systemLabel.textContent = "Backend Offline";
-      if (systemDetail) systemDetail.textContent = "Demo fallback available";
-      if (system) { system.classList.remove("runtime-demo"); system.classList.add("runtime-offline"); }
+      label.textContent = "DEMO MODE";
+      badge.classList.add("runtime-demo");
+      badge.title = "Backend is temporarily unavailable; deterministic demo calculations remain available.";
+      if (systemLabel) systemLabel.textContent = "Demo Mode";
+      if (systemDetail) systemDetail.textContent = "Demo analysis available · live API reconnects automatically";
+      if (system) {
+        system.classList.remove("runtime-offline");
+        system.classList.add("runtime-demo");
+      }
     }
 
-    window.__foresightBackendMode = mode;
+    window.__foresightBackendMode = normalizedMode;
   }
 
   // Exposed for app.js so forecast failures do not overwrite the richer runtime status.
@@ -105,7 +101,7 @@
       updateStatus("online", "Live forecast engine connected");
       return true;
     } catch (error) {
-      updateStatus("offline");
+      updateStatus("demo", "Backend temporarily unavailable");
       return false;
     } finally {
       clearTimeout(timer);
