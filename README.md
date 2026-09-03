@@ -1,127 +1,77 @@
 # Foresight AI — Supply Intelligence
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Application](https://img.shields.io/badge/Application-Live-5f8cff.svg)](https://foresight-ai-6mlt.onrender.com)
-[![Python](https://img.shields.io/badge/Python-3.x-3776AB.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+Foresight AI is a demand forecasting and inventory decision-support platform for SKU-level retail operations. It combines machine-learning forecasts with inventory rules to turn sales history into practical replenishment decisions and business-impact metrics.
 
-**Foresight AI** is an AI-powered demand forecasting and inventory decision-support platform for SKU-level retail operations. It turns historical sales into forecasts, converts forecasts into replenishment decisions, and translates inventory risk into business impact in Indian Rupees (₹).
-
-> **ZIDIO Development Internship Project — Final Project Snapshot**
-
-**Copyright © 2026 Priyadarshan S V.** See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).
-
-## Application
-
-**Live application:** https://foresight-ai-6mlt.onrender.com
-
+**Live application:** https://foresight-ai-6mlt.onrender.com  
 **Custom domain:** https://priyadarshan.tech
 
-**Repository:** https://github.com/darshxn10x/foresight-ai
+## Overview
 
-## Why Foresight?
+Foresight connects the complete planning workflow:
 
-Retail teams often have to decide **how much stock to hold, when to reorder, and how much revenue is exposed** using spreadsheets and intuition. Foresight connects those decisions in one workflow:
+**Historical Sales → Forecast → Validation → Inventory Risk → Reorder Decision → Business Impact**
 
-**Historical Sales → ML Forecast → Validation → Inventory Risk → Reorder Decision → ₹ Business Impact → AI Explanation**
+## Features
 
-## Core Features
-
-- Weekly SKU-level demand forecasting
-- LightGBM production model with Seasonal Naive benchmark
-- Leakage-free 4-fold rolling-origin time-series validation
-- WAPE as the primary forecasting metric, with Bias, MAPE, MAE and RMSE
-- 80% prediction intervals for uncertainty-aware planning
+- SKU-level weekly demand forecasting
+- LightGBM forecasting model with Seasonal Naive benchmark
+- Rolling-origin time-series validation
+- WAPE, Bias, MAPE, MAE and RMSE evaluation
+- Prediction intervals for uncertainty-aware planning
+- Reorder-point and replenishment recommendations
 - Stockout and overstock risk detection
-- **REORDER NOW / MARKDOWN-CLEAR / WATCH / HEALTHY** operational decisions
-- Reorder-point and recommended-order calculation using lead time and safety stock
-- **₹ Sales at Risk** and **₹ Overstock Capital**
-- Estimated replenishment cost and revenue exposure
-- SKU-level inventory risk portfolio snapshot
-- Interactive Forecast, Inventory and AI Insights dashboard
-- **Ask Foresight** dashboard-aware assistant for forecasts, inventory and business-impact questions
-- FastAPI scoring/evaluation backend with a static web frontend
+- Operational states: **REORDER NOW, MARKDOWN / CLEAR, WATCH / VOLATILE, HEALTHY**
+- Sales-at-risk, overstock capital and replenishment-cost calculations
+- Interactive forecasting and inventory dashboard
+- Dashboard-aware AI assistant for operational questions
+- FastAPI backend with a lightweight web frontend
 
-## Model Validation
+## Model
 
-Foresight uses rolling-origin backtesting rather than random train/test splitting because future observations must never leak into historical training windows.
+The forecasting pipeline uses time-aware validation to avoid future-data leakage. LightGBM is evaluated against a Seasonal Naive baseline and selected based on out-of-sample performance.
 
-| Metric | Seasonal Naive | LightGBM | Result |
-|---|---:|---:|---|
-| WAPE | 13.68% | **11.12%** | **18.7% relative improvement** |
-| Bias | +3.60% | **+3.17%** | Lower systematic error |
-| RMSE | 28.46 | **26.44** | Lower error variance |
-| MAE | 12.89 | **10.48** | More precise forecasts |
+Current validation snapshot:
 
-**Selection verdict:** LightGBM Regressor is the production model because it outperformed the Seasonal Naive baseline across the 4 rolling-origin evaluation folds and 195 active SKUs.
+| Metric | Seasonal Naive | LightGBM |
+|---|---:|---:|
+| WAPE | 13.68% | **11.12%** |
+| Bias | +3.60% | **+3.17%** |
+| RMSE | 28.46 | **26.44** |
+| MAE | 12.89 | **10.48** |
 
 ## Inventory Decision Engine
 
-Forecasts are converted into actions instead of stopping at a prediction number:
+Forecast output is translated into an operational recommendation using projected demand, available stock, supplier lead time and safety stock.
 
-- 🔴 **REORDER NOW** — stock is below the reorder point
-- 🟠 **MARKDOWN / CLEAR** — inventory materially exceeds forecast demand
-- 🟡 **WATCH / VOLATILE** — stock is close to projected demand
-- 🟢 **HEALTHY** — inventory is aligned with the forecast and buffer
+- **REORDER NOW** — stock is below the reorder point
+- **MARKDOWN / CLEAR** — inventory materially exceeds projected demand
+- **WATCH / VOLATILE** — inventory is close to projected demand
+- **HEALTHY** — inventory is aligned with demand and buffer requirements
 
-## Business Impact
-
-For the active SKU, the dashboard calculates financial consequences such as:
-
-- **Sales at Risk:** estimated list-price revenue exposed when forecast demand exceeds available stock
-- **Overstock Capital:** unit-cost capital tied up above forecast demand
-- **Estimated Reorder Cost:** unit cost × recommended replenishment quantity
-- **Revenue Exposure:** potential revenue currently exposed to a stock shortage
-
-The dashboard displays these values using **₹ / Indian number formatting** so the model output is directly understandable to business users.
+The platform also estimates the financial exposure associated with inventory shortages, excess stock and recommended replenishment.
 
 ## AI Assistant
 
-**Ask Foresight** is a dashboard-aware assistant. It reads the current dashboard state and can explain:
-
-- Why the active SKU is at risk
-- Whether to reorder
-- Current stock and forecast demand
-- Reorder point and safety stock
-- ₹ business impact
-- Model WAPE and validation results
-- Recommended operational action
-
-## Example Scenario
-
-For `SKU001`:
-
-- Current Stock: 15 units
-- Supplier Lead Time: 7 days
-- Safety Stock: 10 units
-- Forecast Demand: 52 units
-- Reorder Point: 62 units
-- Recommended Order: 47 units
-
-The dashboard identifies the shortage, recommends replenishment, and explains the decision through the AI Insight and assistant.
+**Ask Foresight** uses the current dashboard state to explain forecasts, inventory risk, reorder recommendations, model performance and business impact in plain language.
 
 ## Architecture
 
 ```text
-Historical Sales + SKU Master
-            ↓
-Data Cleaning & Feature Engineering
-            ↓
-LightGBM Forecast + Seasonal Naive Baseline
-            ↓
-4-Fold Rolling-Origin Validation
-            ↓
-WAPE / Bias / MAPE / MAE / RMSE
-            ↓
-Inventory Risk Engine
-            ↓
-Reorder Point + Recommended Order
-            ↓
-₹ Business Impact
-            ↓
+Sales Data + SKU Master
+        ↓
+Data Preparation & Feature Engineering
+        ↓
+LightGBM Forecast + Seasonal Naive Benchmark
+        ↓
+Time-Series Validation
+        ↓
+Inventory Risk & Replenishment Engine
+        ↓
+Business Impact Calculations
+        ↓
 FastAPI Backend
-            ↓
-Foresight AI Web Dashboard + AI Assistant
+        ↓
+Foresight AI Web Dashboard + Assistant
 ```
 
 ## Tech Stack
@@ -135,33 +85,40 @@ Foresight AI Web Dashboard + AI Assistant
 - HTML / CSS / JavaScript
 - Chart.js
 - Render
-- GitHub
 
 ## Project Structure
 
 ```text
 foresight-ai/
-├── backend/        # FastAPI prediction, inventory and evaluation services
-├── frontend/       # Foresight AI dashboard and assistant
-├── data/           # Sales and SKU master data
-├── models/         # Trained forecasting artifacts
-├── reports/        # Validation and project reports
-├── docs/           # Project and submission documentation
-├── src/            # Data science / forecasting source code
-└── tests/          # Automated tests
+├── backend/        # FastAPI services
+├── frontend/       # Web dashboard and assistant
+├── data/            # Source and processed datasets
+├── models/          # Forecasting artifacts
+├── src/             # Forecasting and data pipeline code
+├── reports/         # Model validation utility
+├── tests/           # Automated tests
+├── .gitignore
+└── README.md
 ```
 
-## Documentation
+## Running Locally
 
-- [ZIDIO Internship Project Report](reports/ZIDIO_PROJECT_REPORT.md)
-- [Data Quality Report](reports/data_quality_report.md)
-- [Model Evaluation Report](reports/model_evaluation_report.md)
-- [Final Submission Checklist](docs/FINAL_SUBMISSION_CHECKLIST.md)
-- [Copyright Notice](COPYRIGHT.md)
-- [MIT License](LICENSE)
+### Backend
 
-## Project Status
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-The repository contains the final documented project snapshot, including source code, reports, application documentation, licensing and submission material. The application uses the FastAPI service as its source of truth for forecast, inventory and evaluation results.
+### Frontend
 
-Personal or confidential documents such as offer letters, certificates, signatures, identity documents and private mentor correspondence should remain outside this public repository unless the organization explicitly requires them here.
+Serve the `frontend` directory with any static web server and configure the frontend API endpoint to point to the FastAPI service.
+
+## Repository
+
+https://github.com/darshxn10x/foresight-ai
+
+---
+
+**Foresight AI** — AI-powered demand forecasting and inventory intelligence.
