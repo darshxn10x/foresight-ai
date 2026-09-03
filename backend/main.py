@@ -5,10 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api.forecast import router as forecast_router
-from api.inventory import router as inventory_router
-from api.insights import router as insights_router
-from api.evaluation import router as evaluation_router
+from backend.api.forecast import router as forecast_router
+from backend.api.inventory import router as inventory_router
+from backend.api.insights import router as insights_router
+from backend.api.evaluation import router as evaluation_router
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = BASE_DIR / "frontend"
