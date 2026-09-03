@@ -1,43 +1,48 @@
-/* ZIDIO REQUIREMENTS UI: real rolling-origin validation + inventory decisions. */
-(function () {
+/* ZIDIO FORESIGHT: real rolling-origin validation + INR business impact */
+(function(){
   "use strict";
-  const style=document.createElement("style");
-  style.textContent=`
-    .decision-box{margin-top:18px;padding:16px 18px;border:1px solid #2b3850;border-radius:14px;background:linear-gradient(135deg,rgba(32,46,75,.55),rgba(15,21,34,.8));}
-    .decision-box span,.impact-card>span{display:block;color:#6f86ad;font-size:9px;font-weight:800;letter-spacing:1.5px;margin-bottom:8px}.decision-box strong{display:block;color:#fff;font-size:15px;margin-bottom:6px}.decision-box small{color:#8799b7;line-height:1.5}
-    .impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}.impact-card{padding:20px 22px;border:1px solid #202c42;border-radius:16px;background:#101622;min-height:112px}.impact-card h3{margin:6px 0 8px;color:#eef3ff;font-size:16px;line-height:1.35}.impact-card p{margin:0;color:#7185a7;font-size:11px;line-height:1.5}.impact-values{display:flex;gap:45px;margin-top:10px}.impact-values div{display:flex;flex-direction:column;gap:4px}.impact-values b{font-size:23px;color:#f4f7ff}.impact-values small{color:#7185a7;font-size:10px}@media(max-width:760px){.impact-grid{grid-template-columns:1fr}}
-  `;document.head.appendChild(style);
   const API="https://foresight-ai-6mlt.onrender.com";
-  const num=id=>{const e=document.getElementById(id);if(!e)return null;const n=parseFloat(e.textContent.replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:null};
   const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t};
+  const num=id=>{const e=document.getElementById(id);if(!e)return null;const n=parseFloat(e.textContent.replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:null};
+  const money=n=>n==null?"—":"₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:0});
 
-  function updateDecision(){
-    const stock=num("stock"),demand=num("demand"),reorder=num("reorderPoint"),order=num("recommendedOrder");if(stock===null||reorder===null)return;
-    let decision="HEALTHY 🟢",reason="Inventory is above the reorder point. Continue monitoring demand.";
-    if(stock<reorder){decision="REORDER NOW 🔴";reason=`Stock is ${reorder-stock} units below the reorder point. Replenish approximately ${order??"—"} units.`}
-    else if(demand!==null&&stock>demand*1.75){decision="MARKDOWN / CLEAR 🟠";reason="Inventory is substantially above forecast demand; consider reducing excess stock."}
-    else if(demand!==null&&stock<demand){decision="WATCH / VOLATILE 🟡";reason="Stock is below forecast demand; continue close monitoring."}
-    set("inventoryDecision",decision);set("decisionReason",reason);
+  function decision(){
+    const stock=num("stock"), demand=num("demand"), reorder=num("reorderPoint"), order=num("recommendedOrder");
+    if(stock==null||reorder==null)return;
+    let d="HEALTHY 🟢",r="Inventory is above the reorder point.";
+    if(stock<reorder){d="REORDER NOW 🔴";r=`Stock is ${reorder-stock} units below the reorder point. Replenish approximately ${order??"—"} units.`}
+    else if(demand!=null&&stock>demand*1.75){d="MARKDOWN / CLEAR 🟠";r="Inventory materially exceeds forecast demand; consider markdown or clearance."}
+    else if(demand!=null&&stock<=demand*1.1){d="WATCH / VOLATILE 🟡";r="Inventory is close to projected demand; monitor demand and lead time."}
+    set("inventoryDecision",d);set("decisionReason",r);
   }
-  function updateImpact(){const stock=num("stock"),demand=num("demand");if(stock===null||demand===null)return;set("salesRisk",`${Math.max(0,Math.ceil(demand-stock))} units`);set("overstockCapital",`${Math.max(0,Math.ceil(stock-demand))} units`)}
 
-  async function loadValidation(){
+  async function impact(){
+    const sku=(document.getElementById("skuInput")?.value||"SKU001").trim();
+    const stock=Number(document.getElementById("stockInput")?.value||0);
+    const demand=num("demand");
+    const lead=Number(document.getElementById("leadTimeInput")?.value||7);
+    const safety=Number(document.getElementById("safetyStockInput")?.value||10);
+    if(demand==null||demand<=0)return;
     try{
-      if(typeof demandData==="undefined")return;
-      const r=await fetch(`${API}/evaluation/rolling-origin`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:demandData,horizon_weeks:1})});
-      if(!r.ok)throw new Error();const x=await r.json(),v=x.results&&x.results[0];if(!v)return;
-      if(!v.available){set("modelPerformance",v.message);return}
-      const status=v.beats_baseline?`✓ Beats baseline by ${v.improvement_pct}%`:`✗ Does not beat baseline`;
-      set("modelPerformance",`${v.production_model.replace(/_/g," ")} · WAPE ${v.production_wape}% vs Seasonal Naive ${v.seasonal_naive_wape}% · ${status}`);
-      const p=document.querySelector(".impact-card p");if(p)p.textContent=`Rolling-origin · ${v.folds} folds · WAPE primary · Bias ${v.production_bias}% · MAPE ${v.production_mape}%`;
-    }catch(e){set("modelPerformance","Rolling-origin evaluation unavailable");}
+      const r=await fetch(`${API}/inventory/analyze`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sku_id:sku,current_stock:stock,predicted_demand:Math.round(demand),lead_time_days:lead,safety_stock:safety})});
+      const d=await r.json();
+      set("salesRisk",money(d.sales_at_risk));set("overstockCapital",money(d.overstock_capital));
+      const a=document.querySelector("#salesRisk + small"),b=document.querySelector("#overstockCapital + small");if(a)a.textContent="Sales at Risk";if(b)b.textContent="Overstock Capital";
+      set("inventoryDecision",`${d.decision||"—"}`);set("decisionReason",d.recommendation||"");
+    }catch(e){}
   }
-  function hook(){
-    updateDecision();updateImpact();
-    if(typeof window.getForecast==="function"&&!window.getForecast.__foresightHooked){
-      const original=window.getForecast;const wrapped=async function(){const data=await original.apply(this,arguments);loadValidation();return data};wrapped.__foresightHooked=true;window.getForecast=wrapped;
-    }
+
+  async function validation(){
+    try{
+      const r=await fetch(`${API}/evaluation/summary`);if(!r.ok)throw new Error();
+      const d=await r.json();
+      if(!d.available){set("modelPerformance",d.message||"Rolling-origin validation unavailable");return}
+      const status=d.beats_baseline?`✓ Beats baseline by ${d.improvement_pct}%`:`✗ Baseline currently stronger`;
+      set("modelPerformance",`${d.production_model} · WAPE ${d.production_wape}% vs Seasonal Naive ${d.seasonal_naive_wape}% · ${status}`);
+      const p=document.querySelector(".impact-card:first-child p");if(p)p.textContent=`Rolling-origin · ${d.validated_folds} folds · WAPE primary · Bias ${d.production_bias}% · MAPE ${d.production_mape}%`;
+    }catch(e){set("modelPerformance","Validation service unavailable");}
   }
-  let n=0;const timer=setInterval(()=>{hook();if(++n>40)clearInterval(timer)},400);
-  document.addEventListener("click",()=>setTimeout(()=>{updateDecision();updateImpact()},250));
+
+  function run(){validation();decision();impact();}
+  document.addEventListener("DOMContentLoaded",()=>{setTimeout(run,1800);const b=document.getElementById("generateBtn");if(b)b.addEventListener("click",()=>setTimeout(run,2200));setInterval(run,8000)});
 })();
