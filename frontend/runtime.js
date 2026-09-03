@@ -2,7 +2,16 @@
 (function () {
   "use strict";
 
-  const API = "https://foresight-ai-6mlt.onrender.com";
+  const CONFIGURED_API_URL = "https://foresight-ai-6mlt.onrender.com";
+  const HEALTH_TIMEOUT_MS = 20000;
+
+  function getApiCandidates() {
+    const candidates = [];
+    const sameOrigin = window.location.origin;
+    if (sameOrigin && sameOrigin !== "null") candidates.push(sameOrigin);
+    candidates.push(CONFIGURED_API_URL);
+    return [...new Set(candidates.filter(Boolean).map(url => url.replace(/\/$/, "")))];
+  }
 
   function addStyles() {
     if (document.getElementById("foresightRuntimeStyles")) return;
@@ -90,19 +99,26 @@
   window.__foresightSetMode = updateStatus;
 
   async function checkBackend() {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
-    try {
-      const response = await fetch(`${API}/health?v=${Date.now()}`, { cache: "no-store", signal: controller.signal });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      updateStatus("online", "Forecast engine connected");
-      return true;
-    } catch (error) {
-      updateStatus("unavailable", "Unable to reach forecast engine");
-      return false;
-    } finally {
-      clearTimeout(timer);
+    for (const api of getApiCandidates()) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+      try {
+        const response = await fetch(`${api}/health?v=${Date.now()}`, {
+          cache: "no-store",
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        updateStatus("online", "Forecast engine connected");
+        return true;
+      } catch (error) {
+        // Try the next API candidate. The production service may be waking up.
+      } finally {
+        clearTimeout(timer);
+      }
     }
+
+    updateStatus("unavailable", "Unable to reach forecast engine");
+    return false;
   }
 
   function markPortfolioRows() {
