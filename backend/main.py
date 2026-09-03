@@ -8,7 +8,7 @@ from api.evaluation import router as evaluation_router
 app = FastAPI(
     title="Foresight AI",
     description="AI-Powered Demand Forecasting & Inventory Intelligence Platform",
-    version="1.0.0"
+    version="1.0.1"
 )
 
 app.add_middleware(
