@@ -1,4 +1,4 @@
-const API_URL = "https://foresight-ai-backend.onrender.com";
+const API_URL = "https://foresight-ai-6mlt.onrender.com";
 let forecastChart = null;
 
 
