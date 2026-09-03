@@ -1,15 +1,17 @@
-/* Foresight AI — runtime status and portfolio interactions */
+/* Foresight AI — production runtime status and portfolio interactions */
 (function () {
   "use strict";
 
-  const CONFIGURED_API_URL = "https://foresight-ai-6mlt.onrender.com";
-  const HEALTH_TIMEOUT_MS = 20000;
+  // Production is served from the custom domain. The FastAPI service exposes
+  // both the dashboard and API, so API calls should stay same-origin.
+  const PRODUCTION_ORIGIN = "https://foresight.priyadarshan.tech";
+  const HEALTH_TIMEOUT_MS = 30000;
 
   function getApiCandidates() {
     const candidates = [];
     const sameOrigin = window.location.origin;
     if (sameOrigin && sameOrigin !== "null") candidates.push(sameOrigin);
-    candidates.push(CONFIGURED_API_URL);
+    candidates.push(PRODUCTION_ORIGIN);
     return [...new Set(candidates.filter(Boolean).map(url => url.replace(/\/$/, "")))];
   }
 
@@ -111,7 +113,7 @@
         updateStatus("online", "Forecast engine connected");
         return true;
       } catch (error) {
-        // Try the next API candidate. The production service may be waking up.
+        console.warn(`Health check failed for ${api}:`, error);
       } finally {
         clearTimeout(timer);
       }
