@@ -15,6 +15,8 @@
       .api-status.runtime-demo span { background:#ffb83f; box-shadow:0 0 10px rgba(255,184,63,.4); }
       .system-status.runtime-offline .status-dot { background:#ff6f78; box-shadow:0 0 12px rgba(255,111,120,.45); }
       .system-status.runtime-demo .status-dot { background:#ffb83f; box-shadow:0 0 12px rgba(255,184,63,.4); }
+      .ready-badge.runtime-demo { border-color:#5a4622; color:#ffc65f; background:#211b10; }
+      .live-badge.runtime-demo { border-color:#5a4622; color:#ffc65f; background:#211b10; }
       .runtime-meta { margin-top:8px; color:#526582; font-size:9px; line-height:1.4; }
       .portfolio-table tbody tr[data-sku] { cursor:pointer; transition:background .15s ease; }
       .portfolio-table tbody tr[data-sku]:hover { background:rgba(95,140,255,.08); }
@@ -40,6 +42,21 @@
     window.__foresightToastTimer = setTimeout(() => el.classList.remove("show"), 2200);
   }
 
+  function updateModeBadges(mode) {
+    const ready = document.querySelector(".ready-badge");
+    const live = document.querySelector(".live-badge");
+    if (ready) {
+      ready.classList.toggle("runtime-demo", mode !== "online");
+      ready.innerHTML = mode === "online" ? "<span></span>LIVE READY" : "<span></span>DEMO READY";
+      ready.title = mode === "online" ? "Backend forecast engine is reachable." : "Demo calculations remain available while the backend is offline.";
+    }
+    if (live) {
+      live.classList.toggle("runtime-demo", mode !== "online");
+      live.textContent = mode === "online" ? "LIVE" : "DEMO ANALYSIS";
+      live.title = mode === "online" ? "Inventory analysis is backed by the live API." : "Inventory analysis is running from deterministic demo logic.";
+    }
+  }
+
   function updateStatus(mode, detail) {
     const badge = document.querySelector(".api-status");
     const label = document.getElementById("apiStatus");
@@ -49,11 +66,13 @@
     if (!badge || !label) return;
 
     badge.classList.remove("runtime-offline", "runtime-demo");
+    updateModeBadges(mode);
+
     if (mode === "online") {
       label.textContent = "API CONNECTED";
       badge.title = "Foresight backend is reachable.";
       if (systemLabel) systemLabel.textContent = "System Online";
-      if (systemDetail) systemDetail.textContent = detail || "Forecast engine ready";
+      if (systemDetail) systemDetail.textContent = detail || "Live forecast engine connected";
       if (system) system.classList.remove("runtime-offline", "runtime-demo");
     } else if (mode === "demo") {
       label.textContent = "DEMO FALLBACK";
@@ -70,7 +89,12 @@
       if (systemDetail) systemDetail.textContent = "Demo fallback available";
       if (system) { system.classList.remove("runtime-demo"); system.classList.add("runtime-offline"); }
     }
+
+    window.__foresightBackendMode = mode;
   }
+
+  // Exposed for app.js so forecast failures do not overwrite the richer runtime status.
+  window.__foresightSetMode = updateStatus;
 
   async function checkBackend() {
     const controller = new AbortController();
@@ -78,7 +102,7 @@
     try {
       const response = await fetch(`${API}/health?v=${Date.now()}`, { cache: "no-store", signal: controller.signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      updateStatus("online", "Forecast engine ready");
+      updateStatus("online", "Live forecast engine connected");
       return true;
     } catch (error) {
       updateStatus("offline");
