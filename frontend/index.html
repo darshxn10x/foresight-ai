@@ -30,30 +30,31 @@
         </div>
 
         <nav>
-            <a class="nav-item active">
+            <a class="nav-item active" href="#dashboard">
                 <span>◈</span>
                 Dashboard
             </a>
 
-            <a class="nav-item">
+            <a class="nav-item" href="#forecast">
                 <span>▦</span>
                 Forecasts
             </a>
 
-            <a class="nav-item">
+            <a class="nav-item" href="#inventory">
                 <span>◫</span>
                 Inventory
             </a>
 
-            <a class="nav-item">
+            <a class="nav-item" href="#insights">
                 <span>✦</span>
                 AI Insights
             </a>
         </nav>
 
         <div class="sidebar-bottom">
-            <div class="system-box">
-                <div class="system-dot"></div>
+
+            <div class="system-status">
+                <div class="status-dot"></div>
 
                 <div>
                     <strong>System Online</strong>
@@ -64,29 +65,32 @@
             <div class="version">
                 Foresight AI v1.0
             </div>
+
         </div>
 
     </aside>
 
 
     <!-- MAIN -->
-    <main class="main">
+    <main class="main" id="dashboard">
 
-        <!-- TOP HEADER -->
+        <!-- TOPBAR -->
         <header class="topbar">
 
             <div>
-                <p class="eyebrow">COMMAND CENTER</p>
+                <div class="eyebrow">COMMAND CENTER</div>
                 <h2>Supply Intelligence Dashboard</h2>
             </div>
 
             <div class="top-actions">
-                <div class="live-status">
+
+                <div class="api-status">
                     <span></span>
-                    API CONNECTED
+                    <b id="apiStatus">API CONNECTED</b>
                 </div>
 
-                <div class="avatar">AI</div>
+                <div class="user-badge">AI</div>
+
             </div>
 
         </header>
@@ -118,11 +122,10 @@
                 <div class="orb orb-one"></div>
                 <div class="orb orb-two"></div>
 
-                <div class="forecast-symbol">
-                    <div class="symbol-line"></div>
-                    <div class="symbol-line short"></div>
-                    <div class="symbol-line"></div>
-                    <div class="symbol-line tiny"></div>
+                <div class="chart-icon">
+                    <div></div>
+                    <div></div>
+                    <div></div>
                 </div>
 
             </div>
@@ -130,22 +133,22 @@
         </section>
 
 
-        <!-- CONTROL PANEL -->
-        <section class="control-panel">
+        <!-- FORECAST CONTROLS -->
+        <section class="control-panel" id="forecast">
 
             <div class="section-heading">
 
                 <div>
-                    <span class="section-label">FORECAST ENGINE</span>
+                    <div class="eyebrow">FORECAST ENGINE</div>
 
-                    <h3>Generate Forecast</h3>
+                    <h2>Generate Forecast</h2>
 
                     <p>
                         Configure inventory parameters and run the AI prediction engine.
                     </p>
                 </div>
 
-                <div class="engine-status">
+                <div class="ready-badge">
                     <span></span>
                     READY
                 </div>
@@ -153,13 +156,15 @@
             </div>
 
 
-            <div class="input-grid">
+            <div class="control-grid">
 
-                <div class="input-box">
+                <div class="input-group">
 
-                    <label>SKU IDENTIFIER</label>
+                    <label for="skuInput">
+                        SKU IDENTIFIER
+                    </label>
 
-                    <div class="input-wrapper">
+                    <div class="input-wrap">
                         <span>⌁</span>
 
                         <input
@@ -173,12 +178,14 @@
                 </div>
 
 
-                <div class="input-box">
+                <div class="input-group">
 
-                    <label>CURRENT STOCK</label>
+                    <label for="stockInput">
+                        CURRENT STOCK
+                    </label>
 
-                    <div class="input-wrapper">
-                        <span>◈</span>
+                    <div class="input-wrap">
+                        <span>◇</span>
 
                         <input
                             type="number"
@@ -193,11 +200,13 @@
                 </div>
 
 
-                <div class="input-box">
+                <div class="input-group">
 
-                    <label>SUPPLIER LEAD TIME</label>
+                    <label for="leadTimeInput">
+                        SUPPLIER LEAD TIME
+                    </label>
 
-                    <div class="input-wrapper">
+                    <div class="input-wrap">
                         <span>◷</span>
 
                         <input
@@ -213,11 +222,13 @@
                 </div>
 
 
-                <div class="input-box">
+                <div class="input-group">
 
-                    <label>SAFETY STOCK</label>
+                    <label for="safetyStockInput">
+                        SAFETY STOCK
+                    </label>
 
-                    <div class="input-wrapper">
+                    <div class="input-wrap">
                         <span>◆</span>
 
                         <input
@@ -235,74 +246,79 @@
             </div>
 
 
-            <button id="generateBtn" class="generate-btn">
-                <span>✦</span>
-                Generate AI Forecast
-                <b>→</b>
-            </button>
+            <div class="generate-area">
 
-            <span class="keyboard-hint">
-                Press Enter to generate
-            </span>
+                <button id="generateBtn" class="generate-btn">
+                    ✦ Generate AI Forecast
+                    <span>→</span>
+                </button>
+
+                <span class="enter-hint">
+                    Press Enter to generate
+                </span>
+
+            </div>
 
         </section>
 
 
         <!-- KPI CARDS -->
-        <section class="kpi-grid">
+        <section class="cards">
 
-            <div class="kpi-card">
+            <div class="card">
 
-                <div class="kpi-top">
+                <div class="card-top">
                     <span>ACTIVE SKU</span>
-                    <div class="kpi-icon">#</div>
+                    <b>⌁</b>
                 </div>
 
-                <strong id="sku">SKU001</strong>
+                <h3 id="sku">SKU001</h3>
 
                 <small>Currently analyzed</small>
 
             </div>
 
 
-            <div class="kpi-card">
+            <div class="card">
 
-                <div class="kpi-top">
+                <div class="card-top">
                     <span>CURRENT STOCK</span>
-                    <div class="kpi-icon">◈</div>
+                    <b>◇</b>
                 </div>
 
-                <strong id="stock">--</strong>
+                <h3 id="stock">--</h3>
 
                 <small>Available inventory</small>
 
             </div>
 
 
-            <div class="kpi-card">
+            <div class="card">
 
-                <div class="kpi-top">
+                <div class="card-top">
                     <span>PREDICTED DEMAND</span>
-                    <div class="kpi-icon">↗</div>
+                    <b>↗</b>
                 </div>
 
-                <strong id="demand">--</strong>
+                <h3 id="demand">--</h3>
 
                 <small>Next forecast period</small>
 
             </div>
 
 
-            <div class="kpi-card risk-card">
+            <div class="card">
 
-                <div class="kpi-top">
+                <div class="card-top">
                     <span>INVENTORY RISK</span>
-                    <div class="kpi-icon">!</div>
+                    <b>!</b>
                 </div>
 
-                <strong id="risk">--</strong>
+                <h3 id="risk">--</h3>
 
-                <small id="riskDescription">Awaiting analysis</small>
+                <small id="riskDescription">
+                    Awaiting analysis
+                </small>
 
             </div>
 
@@ -310,86 +326,88 @@
 
 
         <!-- ANALYSIS -->
-        <section class="analysis-grid">
+        <section class="dashboard-grid">
 
-            <!-- INVENTORY -->
-            <div class="dashboard-card">
+            <div class="panel" id="inventory">
 
-                <div class="card-heading">
+                <div class="panel-heading">
 
                     <div>
-                        <span class="section-label">INVENTORY</span>
-                        <h3>Inventory Analysis</h3>
+                        <div class="eyebrow">INVENTORY</div>
+                        <h2>Inventory Analysis</h2>
                     </div>
 
-                    <span class="card-badge">LIVE</span>
+                    <span class="live-badge">
+                        LIVE
+                    </span>
 
                 </div>
 
 
-                <div class="metrics">
+                <div class="metric">
 
-                    <div class="metric">
-                        <div>
-                            <span>Reorder Point</span>
-                            <small>Minimum recommended level</small>
-                        </div>
-
-                        <strong id="reorderPoint">--</strong>
+                    <div>
+                        <strong>Reorder Point</strong>
+                        <small>Minimum recommended inventory level</small>
                     </div>
 
+                    <b id="reorderPoint">--</b>
 
-                    <div class="metric">
-                        <div>
-                            <span>Recommended Order</span>
-                            <small>Suggested replenishment quantity</small>
-                        </div>
+                </div>
 
-                        <strong id="recommendedOrder">--</strong>
+
+                <div class="metric">
+
+                    <div>
+                        <strong>Recommended Order</strong>
+                        <small>Suggested replenishment quantity</small>
                     </div>
 
+                    <b id="recommendedOrder">--</b>
 
-                    <div class="metric">
-                        <div>
-                            <span>Safety Stock</span>
-                            <small>Buffer against demand uncertainty</small>
-                        </div>
+                </div>
 
-                        <strong id="safetyStock">--</strong>
+
+                <div class="metric">
+
+                    <div>
+                        <strong>Safety Stock</strong>
+                        <small>Buffer against demand uncertainty</small>
                     </div>
+
+                    <b id="safetyStock">--</b>
 
                 </div>
 
             </div>
 
 
-            <!-- AI INSIGHT -->
-            <div class="dashboard-card insight-card">
+            <div class="panel insight-panel" id="insights">
 
-                <div class="card-heading">
+                <div class="panel-heading">
 
                     <div>
-                        <span class="section-label">INTELLIGENCE</span>
-                        <h3>AI Insight</h3>
+                        <div class="eyebrow">INTELLIGENCE</div>
+                        <h2>AI Insight</h2>
                     </div>
 
-                    <div class="ai-badge">✦ AI</div>
+                    <span class="ai-badge">
+                        ✦ AI
+                    </span>
 
                 </div>
 
 
-                <div class="insight-content">
-
-                    <p id="insight">
-                        Generate a forecast to receive AI-powered inventory analysis.
-                    </p>
-
-                </div>
+                <p id="insight" class="insight-text">
+                    Generate a forecast to receive AI-powered inventory analysis.
+                </p>
 
 
                 <div class="recommendation">
 
-                    <div class="recommendation-icon">✓</div>
+                    <div class="recommendation-icon">
+                        ✓
+                    </div>
 
                     <div>
                         <span>RECOMMENDED ACTION</span>
@@ -406,22 +424,24 @@
         </section>
 
 
-        <!-- FORECAST -->
-        <section class="dashboard-card forecast-card">
+        <!-- CHART -->
+        <section class="panel forecast-panel">
 
-            <div class="card-heading">
+            <div class="panel-heading">
 
                 <div>
-                    <span class="section-label">DEMAND PLANNING</span>
+                    <div class="eyebrow">DEMAND PLANNING</div>
 
-                    <h3>Demand Forecast</h3>
+                    <h2>Demand Forecast</h2>
 
-                    <p>Historical demand vs AI predicted demand</p>
+                    <p>
+                        Historical demand vs AI predicted demand
+                    </p>
                 </div>
 
-                <div class="model-badge" id="forecastModel">
-                    MODEL: --
-                </div>
+                <span class="model-badge" id="forecastModel">
+                    MODEL: —
+                </span>
 
             </div>
 
@@ -432,17 +452,19 @@
 
 
             <div id="forecastList" class="forecast-list">
+
                 <div class="empty-state">
                     Generate a forecast to view upcoming demand.
                 </div>
+
             </div>
 
         </section>
 
 
         <footer>
-            <span>FORESIGHT AI</span>
-            AI-Powered Demand Forecasting & Inventory Intelligence
+            <strong>FORESIGHT AI</strong>
+            <span>AI-Powered Demand Forecasting & Inventory Intelligence</span>
         </footer>
 
     </main>
