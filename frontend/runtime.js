@@ -1,4 +1,4 @@
-/* Foresight AI — runtime polish for demos and evaluation */
+/* Foresight AI — polished runtime status + portfolio interactions */
 (function () {
   "use strict";
 
@@ -9,7 +9,6 @@
     const style = document.createElement("style");
     style.id = "foresightRuntimeStyles";
     style.textContent = `
-      /* Backend unavailable is a supported demo state — never present it as an error. */
       .api-status.runtime-demo { border-color:#5a4622; background:#211b10; color:#ffc65f; }
       .api-status.runtime-demo span { background:#ffb83f; box-shadow:0 0 10px rgba(255,184,63,.4); }
       .system-status.runtime-demo .status-dot { background:#ffb83f; box-shadow:0 0 12px rgba(255,184,63,.4); }
@@ -22,6 +21,7 @@
       .portfolio-table tbody tr[data-sku]:hover td:first-child strong::after { opacity:1; }
       .runtime-toast { position:fixed; left:50%; bottom:26px; transform:translate(-50%,12px); opacity:0; z-index:12000; padding:10px 15px; border:1px solid #2c3c5c; border-radius:999px; background:#111a2a; color:#d7e1f3; font:700 11px Inter,sans-serif; box-shadow:0 16px 44px rgba(0,0,0,.4); pointer-events:none; transition:opacity .18s ease,transform .18s ease; }
       .runtime-toast.show { opacity:1; transform:translate(-50%,0); }
+      .backend-note { color:#7386a7; font-size:10px; margin-top:10px; }
     `;
     document.head.appendChild(style);
   }
@@ -43,15 +43,16 @@
   function updateModeBadges(mode) {
     const ready = document.querySelector(".ready-badge");
     const live = document.querySelector(".live-badge");
+    const online = mode === "online";
     if (ready) {
-      ready.classList.toggle("runtime-demo", mode !== "online");
-      ready.innerHTML = mode === "online" ? "<span></span>LIVE READY" : "<span></span>DEMO READY";
-      ready.title = mode === "online" ? "Backend forecast engine is reachable." : "Demo calculations remain available while the backend is temporarily unavailable.";
+      ready.classList.toggle("runtime-demo", !online);
+      ready.innerHTML = online ? "<span></span>LIVE READY" : "<span></span>DEMO READY";
+      ready.title = online ? "Live backend connected." : "Backend unavailable; deterministic demo analysis is active.";
     }
     if (live) {
-      live.classList.toggle("runtime-demo", mode !== "online");
-      live.textContent = mode === "online" ? "LIVE" : "DEMO ANALYSIS";
-      live.title = mode === "online" ? "Inventory analysis is backed by the live API." : "Inventory analysis is running from deterministic demo logic.";
+      live.classList.toggle("runtime-demo", !online);
+      live.textContent = online ? "LIVE" : "DEMO ANALYSIS";
+      live.title = online ? "Inventory analysis is backed by the live API." : "Inventory analysis is running from the demo calculation path.";
     }
   }
 
@@ -63,12 +64,11 @@
     const systemDetail = document.getElementById("systemStatusDetail");
     if (!badge || !label) return;
 
-    /* Normalize any connectivity failure to the polished demo state. */
-    const normalizedMode = mode === "online" ? "online" : "demo";
+    const normalized = mode === "online" ? "online" : "demo";
     badge.classList.remove("runtime-offline", "runtime-demo");
-    updateModeBadges(normalizedMode);
+    updateModeBadges(normalized);
 
-    if (normalizedMode === "online") {
+    if (normalized === "online") {
       label.textContent = "API CONNECTED";
       badge.title = "Foresight backend is reachable.";
       if (systemLabel) systemLabel.textContent = "System Online";
@@ -77,7 +77,7 @@
     } else {
       label.textContent = "DEMO MODE";
       badge.classList.add("runtime-demo");
-      badge.title = "Backend is temporarily unavailable; deterministic demo calculations remain available.";
+      badge.title = "Backend is temporarily unavailable; demo analysis remains available.";
       if (systemLabel) systemLabel.textContent = "Demo Mode";
       if (systemDetail) systemDetail.textContent = "Demo analysis available · live API reconnects automatically";
       if (system) {
@@ -86,10 +86,9 @@
       }
     }
 
-    window.__foresightBackendMode = normalizedMode;
+    window.__foresightBackendMode = normalized;
   }
 
-  // Exposed for app.js so forecast failures do not overwrite the richer runtime status.
   window.__foresightSetMode = updateStatus;
 
   async function checkBackend() {
@@ -126,14 +125,14 @@
       const row = event.target.closest("tr[data-sku]");
       if (!row) return;
       const sku = row.dataset.sku;
-      const source = [...row.children].map(cell => cell.textContent.trim());
-      const stock = parseFloat(source[2]);
+      const cells = [...row.children];
+      const stock = parseFloat(cells[2]?.textContent || "");
       const skuInput = document.getElementById("skuInput");
       const stockInput = document.getElementById("stockInput");
       if (skuInput) skuInput.value = sku;
       if (stockInput && Number.isFinite(stock)) stockInput.value = stock;
       document.getElementById("forecast")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      toast(`${sku} loaded — generating forecast`);
+      toast(`${sku} loaded — generating analysis`);
       setTimeout(() => document.getElementById("generateBtn")?.click(), 260);
     });
   }
@@ -159,7 +158,7 @@
       const meta = document.createElement("div");
       meta.id = "runtimeMeta";
       meta.className = "runtime-meta";
-      meta.textContent = "Backend health is checked automatically · demo fallback remains available";
+      meta.textContent = "Backend health checked automatically · demo fallback remains available";
       status.parentElement?.appendChild(meta);
     }
   });
