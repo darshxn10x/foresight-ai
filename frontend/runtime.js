@@ -1,4 +1,4 @@
-/* Foresight AI — polished runtime status + portfolio interactions */
+/* Foresight AI — runtime status and portfolio interactions */
 (function () {
   "use strict";
 
@@ -9,11 +9,11 @@
     const style = document.createElement("style");
     style.id = "foresightRuntimeStyles";
     style.textContent = `
-      .api-status.runtime-demo { border-color:#5a4622; background:#211b10; color:#ffc65f; }
-      .api-status.runtime-demo span { background:#ffb83f; box-shadow:0 0 10px rgba(255,184,63,.4); }
-      .system-status.runtime-demo .status-dot { background:#ffb83f; box-shadow:0 0 12px rgba(255,184,63,.4); }
-      .ready-badge.runtime-demo { border-color:#5a4622; color:#ffc65f; background:#211b10; }
-      .live-badge.runtime-demo { border-color:#5a4622; color:#ffc65f; background:#211b10; }
+      .api-status.runtime-unavailable { border-color:#5a4622; background:#211b10; color:#ffc65f; }
+      .api-status.runtime-unavailable span { background:#ffb83f; box-shadow:0 0 10px rgba(255,184,63,.4); }
+      .system-status.runtime-unavailable .status-dot { background:#ffb83f; box-shadow:0 0 12px rgba(255,184,63,.4); }
+      .ready-badge.runtime-unavailable { border-color:#5a4622; color:#ffc65f; background:#211b10; }
+      .live-badge.runtime-unavailable { border-color:#5a4622; color:#ffc65f; background:#211b10; }
       .runtime-meta { margin-top:8px; color:#526582; font-size:9px; line-height:1.4; }
       .portfolio-table tbody tr[data-sku] { cursor:pointer; transition:background .15s ease; }
       .portfolio-table tbody tr[data-sku]:hover { background:rgba(95,140,255,.08); }
@@ -21,7 +21,6 @@
       .portfolio-table tbody tr[data-sku]:hover td:first-child strong::after { opacity:1; }
       .runtime-toast { position:fixed; left:50%; bottom:26px; transform:translate(-50%,12px); opacity:0; z-index:12000; padding:10px 15px; border:1px solid #2c3c5c; border-radius:999px; background:#111a2a; color:#d7e1f3; font:700 11px Inter,sans-serif; box-shadow:0 16px 44px rgba(0,0,0,.4); pointer-events:none; transition:opacity .18s ease,transform .18s ease; }
       .runtime-toast.show { opacity:1; transform:translate(-50%,0); }
-      .backend-note { color:#7386a7; font-size:10px; margin-top:10px; }
     `;
     document.head.appendChild(style);
   }
@@ -45,14 +44,14 @@
     const live = document.querySelector(".live-badge");
     const online = mode === "online";
     if (ready) {
-      ready.classList.toggle("runtime-demo", !online);
-      ready.innerHTML = online ? "<span></span>LIVE READY" : "<span></span>DEMO READY";
-      ready.title = online ? "Live backend connected." : "Backend unavailable; deterministic demo analysis is active.";
+      ready.classList.toggle("runtime-unavailable", !online);
+      ready.innerHTML = online ? "<span></span>READY" : "<span></span>UNAVAILABLE";
+      ready.title = online ? "Forecast backend connected." : "Forecast backend is unavailable.";
     }
     if (live) {
-      live.classList.toggle("runtime-demo", !online);
-      live.textContent = online ? "LIVE" : "DEMO ANALYSIS";
-      live.title = online ? "Inventory analysis is backed by the live API." : "Inventory analysis is running from the demo calculation path.";
+      live.classList.toggle("runtime-unavailable", !online);
+      live.textContent = online ? "LIVE" : "UNAVAILABLE";
+      live.title = online ? "Inventory analysis is backed by the API." : "Inventory analysis is unavailable until the API reconnects.";
     }
   }
 
@@ -64,29 +63,28 @@
     const systemDetail = document.getElementById("systemStatusDetail");
     if (!badge || !label) return;
 
-    const normalized = mode === "online" ? "online" : "demo";
-    badge.classList.remove("runtime-offline", "runtime-demo");
+    const normalized = mode === "online" ? "online" : mode === "unavailable" ? "unavailable" : "checking";
+    badge.classList.remove("runtime-unavailable");
     updateModeBadges(normalized);
 
     if (normalized === "online") {
       label.textContent = "API CONNECTED";
       badge.title = "Foresight backend is reachable.";
       if (systemLabel) systemLabel.textContent = "System Online";
-      if (systemDetail) systemDetail.textContent = detail || "Live forecast engine connected";
-      if (system) system.classList.remove("runtime-offline", "runtime-demo");
+      if (systemDetail) systemDetail.textContent = detail || "Forecast engine connected";
+      if (system) system.classList.remove("runtime-unavailable");
+    } else if (normalized === "unavailable") {
+      label.textContent = "API UNAVAILABLE";
+      badge.classList.add("runtime-unavailable");
+      badge.title = "Foresight backend is currently unavailable.";
+      if (systemLabel) systemLabel.textContent = "Service Unavailable";
+      if (systemDetail) systemDetail.textContent = detail || "Unable to reach forecast engine";
+      if (system) system.classList.add("runtime-unavailable");
     } else {
-      label.textContent = "DEMO MODE";
-      badge.classList.add("runtime-demo");
-      badge.title = "Backend is temporarily unavailable; demo analysis remains available.";
-      if (systemLabel) systemLabel.textContent = "Demo Mode";
-      if (systemDetail) systemDetail.textContent = "Demo analysis available · live API reconnects automatically";
-      if (system) {
-        system.classList.remove("runtime-offline");
-        system.classList.add("runtime-demo");
-      }
+      label.textContent = "CHECKING API";
+      if (systemLabel) systemLabel.textContent = "Checking system…";
+      if (systemDetail) systemDetail.textContent = "Connecting to forecast engine";
     }
-
-    window.__foresightBackendMode = normalized;
   }
 
   window.__foresightSetMode = updateStatus;
@@ -97,10 +95,10 @@
     try {
       const response = await fetch(`${API}/health?v=${Date.now()}`, { cache: "no-store", signal: controller.signal });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      updateStatus("online", "Live forecast engine connected");
+      updateStatus("online", "Forecast engine connected");
       return true;
     } catch (error) {
-      updateStatus("demo", "Backend temporarily unavailable");
+      updateStatus("unavailable", "Unable to reach forecast engine");
       return false;
     } finally {
       clearTimeout(timer);
@@ -132,12 +130,12 @@
       if (skuInput) skuInput.value = sku;
       if (stockInput && Number.isFinite(stock)) stockInput.value = stock;
       document.getElementById("forecast")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      toast(`${sku} loaded — generating analysis`);
+      toast(`${sku} loaded`);
       setTimeout(() => document.getElementById("generateBtn")?.click(), 260);
     });
   }
 
-  function observeEnhancements() {
+  function observe() {
     const observer = new MutationObserver(() => {
       markPortfolioRows();
       bindPortfolioInteraction();
@@ -149,7 +147,7 @@
     addStyles();
     markPortfolioRows();
     bindPortfolioInteraction();
-    observeEnhancements();
+    observe();
     checkBackend();
     setInterval(checkBackend, 30000);
 
@@ -158,7 +156,7 @@
       const meta = document.createElement("div");
       meta.id = "runtimeMeta";
       meta.className = "runtime-meta";
-      meta.textContent = "Backend health checked automatically · demo fallback remains available";
+      meta.textContent = "Backend health checked automatically";
       status.parentElement?.appendChild(meta);
     }
   });

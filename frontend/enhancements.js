@@ -1,12 +1,9 @@
-/* ======================================================
-   FORESIGHT AI — ZIDIO PROJECT ENHANCEMENTS
-   Business impact • Model validation • Inventory portfolio
-   ====================================================== */
+/* Foresight AI — business impact and inventory portfolio */
 (function () {
   "use strict";
 
   const API = "https://foresight-ai-6mlt.onrender.com";
-  const RAW_SKU = "https://raw.githubusercontent.com/darshxn10x/foresight-ai/main/data/raw/sku_master.csv";
+  const SKU_MASTER = "https://raw.githubusercontent.com/darshxn10x/foresight-ai/main/data/raw/sku_master.csv";
 
   const set = (id, value) => {
     const el = document.getElementById(id);
@@ -16,8 +13,8 @@
   const readNumber = id => {
     const el = document.getElementById(id);
     if (!el) return null;
-    const n = parseFloat(String(el.textContent).replace(/[^0-9.-]/g, ""));
-    return Number.isFinite(n) ? n : null;
+    const value = parseFloat(String(el.textContent).replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(value) ? value : null;
   };
 
   const money = value => Number.isFinite(Number(value))
@@ -31,19 +28,19 @@
     const demand = readNumber("demand");
     const reorder = readNumber("reorderPoint");
     const order = readNumber("recommendedOrder");
-    if ([stock, demand, reorder].some(v => v === null)) return false;
+    if ([stock, demand, reorder].some(value => value === null)) return false;
 
-    let decision = "HEALTHY 🟢";
+    let decision = "HEALTHY";
     let reason = "Inventory is above the reorder point and aligned with projected demand.";
 
     if (stock < reorder) {
-      decision = "REORDER NOW 🔴";
+      decision = "REORDER NOW";
       reason = `Stock is ${Math.round(reorder - stock)} units below the reorder point. Replenish approximately ${order ?? "—"} units.`;
     } else if (demand != null && stock > demand * 1.5) {
-      decision = "MARKDOWN / CLEAR 🟠";
+      decision = "MARKDOWN / CLEAR";
       reason = "Inventory materially exceeds forecast demand; consider markdown or clearance.";
     } else if (demand != null && stock <= demand * 1.1) {
-      decision = "WATCH / VOLATILE 🟡";
+      decision = "WATCH / VOLATILE";
       reason = "Inventory is close to projected demand; monitor demand and supplier lead time.";
     }
 
@@ -54,25 +51,21 @@
 
   async function getPrices(sku) {
     try {
-      const response = await fetch(RAW_SKU + "?v=" + Date.now(), { cache: "no-store" });
+      const response = await fetch(`${SKU_MASTER}?v=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error();
       const lines = (await response.text()).split(/\r?\n/).filter(Boolean);
-      const headers = lines.shift().split(",").map(v => v.trim());
-      const si = headers.indexOf("sku_id");
-      const ci = headers.indexOf("unit_cost");
-      const pi = headers.indexOf("list_price");
+      const headers = lines.shift().split(",").map(value => value.trim());
+      const skuIndex = headers.indexOf("sku_id");
+      const costIndex = headers.indexOf("unit_cost");
+      const priceIndex = headers.indexOf("list_price");
       for (const line of lines) {
-        const cols = line.split(",");
-        if (normalizeSku(cols[si]) === normalizeSku(sku)) {
-          return { unit_cost: Number(cols[ci]), list_price: Number(cols[pi]) };
+        const columns = line.split(",");
+        if (normalizeSku(columns[skuIndex]) === normalizeSku(sku)) {
+          return { unit_cost: Number(columns[costIndex]), list_price: Number(columns[priceIndex]) };
         }
       }
-    } catch (e) {
-      console.warn("SKU master fetch failed", e);
-    }
-
-    if (normalizeSku(sku) === "SKU001") {
-      return { unit_cost: 575.03, list_price: 1145.76 };
+    } catch (error) {
+      console.warn("Unable to load SKU pricing", error);
     }
     return null;
   }
@@ -85,9 +78,8 @@
 
     const prices = await getPrices(sku);
     let server = null;
-
     try {
-      const r = await fetch(`${API}/inventory/analyze?v=${Date.now()}`, {
+      const response = await fetch(`${API}/inventory/analyze?v=${Date.now()}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -98,8 +90,8 @@
           safety_stock: Number(document.getElementById("safetyStockInput")?.value || 10)
         })
       });
-      if (r.ok) server = await r.json();
-    } catch (e) {}
+      if (response.ok) server = await response.json();
+    } catch (error) {}
 
     const salesAtRisk = Number.isFinite(Number(server?.sales_at_risk))
       ? Number(server.sales_at_risk)
@@ -111,60 +103,40 @@
 
     const recommendedOrder = readNumber("recommendedOrder") || 0;
     const reorderCost = prices ? recommendedOrder * prices.unit_cost : null;
-    const protectedRevenue = prices ? Math.max(0, demand - stock) * prices.list_price : null;
+    const revenueExposure = prices ? Math.max(0, demand - stock) * prices.list_price : null;
 
     set("salesRisk", money(salesAtRisk));
     set("overstockCapital", money(overstockCapital));
     set("reorderCost", money(reorderCost));
-    set("protectedRevenue", money(protectedRevenue));
-
-    const a = document.querySelector("#salesRisk + small");
-    const b = document.querySelector("#overstockCapital + small");
-    const c = document.querySelector("#reorderCost + small");
-    const d = document.querySelector("#protectedRevenue + small");
-    if (a) a.textContent = "Sales at Risk";
-    if (b) b.textContent = "Overstock Capital";
-    if (c) c.textContent = "Estimated Reorder Cost";
-    if (d) d.textContent = "Revenue at Risk";
+    set("protectedRevenue", money(revenueExposure));
 
     return true;
   }
 
   async function updateValidation() {
     try {
-      const r = await fetch(`${API}/evaluation/summary?v=${Date.now()}`, { cache: "no-store" });
-      if (!r.ok) throw new Error();
-      const d = await r.json();
-      if (!d.available) throw new Error(d.message || "Unavailable");
+      const response = await fetch(`${API}/evaluation/summary?v=${Date.now()}`, { cache: "no-store" });
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      if (!data.available) throw new Error(data.message || "Evaluation unavailable");
 
-      const status = d.beats_baseline
-        ? `✓ Beats Seasonal Naive by ${d.improvement_pct}%`
+      const status = data.beats_baseline
+        ? `✓ Beats Seasonal Naive by ${data.improvement_pct}%`
         : "Seasonal Naive currently stronger";
 
-      set("modelPerformance", `${d.production_model} · WAPE ${d.production_wape}% vs Seasonal Naive ${d.seasonal_naive_wape}% · ${status}`);
-      const p = document.querySelector(".impact-card:first-child p");
-      if (p) p.textContent = `Rolling-origin · ${d.validated_folds} folds · WAPE primary · Bias ${d.production_bias}% · MAPE ${d.production_mape}%`;
+      set("modelPerformance", `${data.production_model} · WAPE ${data.production_wape}% vs Seasonal Naive ${data.seasonal_naive_wape}% · ${status}`);
+      const detail = document.querySelector(".impact-card:first-child p");
+      if (detail) detail.textContent = `Rolling-origin · ${data.validated_folds} folds · WAPE primary · Bias ${data.production_bias}% · MAPE ${data.production_mape}%`;
       return true;
-    } catch (e) {
-      // Report-backed fallback keeps the dashboard truthful when Render is cold/offline.
-      const d = {
-        production_model: "LightGBM Regressor",
-        production_wape: 11.12,
-        seasonal_naive_wape: 13.68,
-        improvement_pct: 18.7,
-        production_bias: 3.17,
-        production_mape: 10.48,
-        validated_folds: 4
-      };
-
-      set("modelPerformance", `${d.production_model} · WAPE ${d.production_wape}% vs Seasonal Naive ${d.seasonal_naive_wape}% · ✓ Beats Seasonal Naive by ${d.improvement_pct}%`);
-      const p = document.querySelector(".impact-card:first-child p");
-      if (p) p.textContent = `4-fold rolling-origin · WAPE primary · Bias ${d.production_bias}% · MAPE ${d.production_mape}% · 195 SKUs · Report-backed validation`;
-      return true;
+    } catch (error) {
+      set("modelPerformance", "Evaluation unavailable");
+      const detail = document.querySelector(".impact-card:first-child p");
+      if (detail) detail.textContent = "Connect to the forecast service to view current validation metrics.";
+      return false;
     }
   }
 
-  function injectEnhancementStyles() {
+  function injectStyles() {
     if (document.getElementById("foresightEnhancementStyles")) return;
     const style = document.createElement("style");
     style.id = "foresightEnhancementStyles";
@@ -193,10 +165,10 @@
 
   function ensureBusinessImpactCards() {
     const grid = document.querySelector(".impact-grid");
-    if (!grid || grid.dataset.zidioEnhanced === "true") return;
+    if (!grid || grid.dataset.enhanced === "true") return;
 
     grid.classList.add("zidio-impact-grid");
-    grid.dataset.zidioEnhanced = "true";
+    grid.dataset.enhanced = "true";
     grid.innerHTML = `
       <div class="impact-card zidio-impact-card">
         <span class="impact-kicker">MODEL VALIDATION</span>
@@ -227,12 +199,12 @@
   }
 
   const portfolioRows = [
-    { sku:"SKU001", category:"Home Décor", stock:50, demand:52, lead:7, safety:10, cost:575.03, price:1145.76 },
-    { sku:"SKU002", category:"Small Appliances", stock:18, demand:30, lead:7, safety:8, cost:7470.83, price:12986.92 },
-    { sku:"SKU003", category:"Bedding & Bath", stock:90, demand:60, lead:7, safety:12, cost:2807.67, price:4265.05 },
-    { sku:"SKU004", category:"Kitchen & Dining", stock:24, demand:28, lead:5, safety:8, cost:1623.71, price:2924.32 },
-    { sku:"SKU005", category:"Furnishings", stock:8, demand:12, lead:10, safety:5, cost:21326.46, price:43096.40 },
-    { sku:"SKU006", category:"Furnishings", stock:74, demand:45, lead:6, safety:10, cost:1847.63, price:3685.53 }
+    { sku:"SKU001", category:"Home Décor", stock:50, demand:52, lead:7, safety:10 },
+    { sku:"SKU002", category:"Small Appliances", stock:18, demand:30, lead:7, safety:8 },
+    { sku:"SKU003", category:"Bedding & Bath", stock:90, demand:60, lead:7, safety:12 },
+    { sku:"SKU004", category:"Kitchen & Dining", stock:24, demand:28, lead:5, safety:8 },
+    { sku:"SKU005", category:"Furnishings", stock:8, demand:12, lead:10, safety:5 },
+    { sku:"SKU006", category:"Furnishings", stock:74, demand:45, lead:6, safety:10 }
   ];
 
   function portfolioDecision(row) {
@@ -241,7 +213,6 @@
     let risk = "Healthy";
     if (row.stock < row.safety) risk = "Critical";
     else if (row.stock < reorder) risk = "Warning";
-    else if (row.stock > row.demand * 1.5) risk = "Healthy";
     return { reorder, order, risk };
   }
 
@@ -255,18 +226,16 @@
     section.id = "portfolioSnapshot";
 
     const rows = portfolioRows.map(row => {
-      const d = portfolioDecision(row);
-      const riskClass = d.risk.toLowerCase();
+      const decision = portfolioDecision(row);
       return `
         <tr>
           <td><strong>${row.sku}</strong></td>
           <td>${row.category}</td>
           <td>${row.stock}</td>
           <td>${row.demand}</td>
-          <td>${d.reorder}</td>
-          <td>${d.order}</td>
-          <td><span class="risk-pill risk-${riskClass}">${d.risk.toUpperCase()}</span></td>
-          <td>${money(Math.max(0, row.demand - row.stock) * row.price)}</td>
+          <td>${decision.reorder}</td>
+          <td>${decision.order}</td>
+          <td><span class="risk-pill risk-${decision.risk.toLowerCase()}">${decision.risk.toUpperCase()}</span></td>
         </tr>`;
     }).join("");
 
@@ -275,19 +244,19 @@
         <div>
           <div class="eyebrow">PORTFOLIO CONTROL</div>
           <h2>Inventory Risk Snapshot</h2>
-          <p>SKU-level view of demand, reorder requirements and revenue exposure.</p>
+          <p>SKU-level view of demand, reorder requirements and risk exposure.</p>
         </div>
         <span class="live-badge">6 SKUs</span>
       </div>
       <div class="portfolio-table-wrap">
         <table class="portfolio-table">
           <thead><tr>
-            <th>SKU</th><th>CATEGORY</th><th>STOCK</th><th>FORECAST</th><th>REORDER PT.</th><th>ORDER</th><th>RISK</th><th>SALES AT RISK</th>
+            <th>SKU</th><th>CATEGORY</th><th>STOCK</th><th>FORECAST</th><th>REORDER PT.</th><th>ORDER</th><th>RISK</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <div class="portfolio-note">Portfolio snapshot uses the project's SKU master pricing and demo inventory assumptions. Generate Forecast to analyze the active SKU with live backend values.</div>
+      <div class="portfolio-note">Portfolio snapshot from the project inventory dataset. Select a SKU to run the active analysis.</div>
     `;
 
     forecastPanel.parentNode.insertBefore(section, forecastPanel.nextSibling);
@@ -301,7 +270,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    injectEnhancementStyles();
+    injectStyles();
     ensureBusinessImpactCards();
     injectPortfolioTable();
     setTimeout(refresh, 2500);
@@ -309,6 +278,6 @@
     const button = document.getElementById("generateBtn");
     if (button) button.addEventListener("click", () => setTimeout(refresh, 3500));
 
-    setInterval(refresh, 15000);
+    setInterval(refresh, 30000);
   });
 })();

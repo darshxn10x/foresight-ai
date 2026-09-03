@@ -1,7 +1,7 @@
 # Foresight AI — Supply Intelligence
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Live Demo](https://img.shields.io/badge/Live-Demo-5f8cff.svg)](https://foresight-ai-6mlt.onrender.com)
+[![Application](https://img.shields.io/badge/Application-Live-5f8cff.svg)](https://foresight-ai-6mlt.onrender.com)
 [![Python](https://img.shields.io/badge/Python-3.x-3776AB.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 
@@ -11,7 +11,7 @@
 
 **Copyright © 2026 Priyadarshan S V.** See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).
 
-## 🚀 Live Demo
+## Application
 
 **Live application:** https://foresight-ai-6mlt.onrender.com
 
@@ -39,9 +39,8 @@ Retail teams often have to decide **how much stock to hold, when to reorder, and
 - Estimated replenishment cost and revenue exposure
 - SKU-level inventory risk portfolio snapshot
 - Interactive Forecast, Inventory and AI Insights dashboard
-- **Ask Foresight** dashboard-aware chatbot for forecasts, inventory and business-impact questions
+- **Ask Foresight** dashboard-aware assistant for forecasts, inventory and business-impact questions
 - FastAPI scoring/evaluation backend with a static web frontend
-- Graceful **Demo Mode** fallback when the live API is temporarily unavailable
 
 ## Model Validation
 
@@ -88,7 +87,7 @@ The dashboard displays these values using **₹ / Indian number formatting** so 
 - Model WAPE and validation results
 - Recommended operational action
 
-## Example Demo Scenario
+## Example Scenario
 
 For `SKU001`:
 
@@ -99,7 +98,7 @@ For `SKU001`:
 - Reorder Point: 62 units
 - Recommended Order: 47 units
 
-The dashboard identifies the shortage, recommends replenishment, and explains the decision through the AI Insight and chatbot.
+The dashboard identifies the shortage, recommends replenishment, and explains the decision through the AI Insight and assistant.
 
 ## Architecture
 
@@ -143,11 +142,11 @@ Foresight AI Web Dashboard + AI Assistant
 ```text
 foresight-ai/
 ├── backend/        # FastAPI prediction, inventory and evaluation services
-├── frontend/       # Foresight AI dashboard and chatbot
+├── frontend/       # Foresight AI dashboard and assistant
 ├── data/           # Sales and SKU master data
 ├── models/         # Trained forecasting artifacts
 ├── reports/        # Validation and project reports
-├── docs/           # Final demo and internship submission documentation
+├── docs/           # Project and submission documentation
 ├── src/            # Data science / forecasting source code
 └── tests/          # Automated tests
 ```
@@ -158,12 +157,11 @@ foresight-ai/
 - [Data Quality Report](reports/data_quality_report.md)
 - [Model Evaluation Report](reports/model_evaluation_report.md)
 - [Final Submission Checklist](docs/FINAL_SUBMISSION_CHECKLIST.md)
-- [Final Demo Guide](docs/DEMO_GUIDE.md)
 - [Copyright Notice](COPYRIGHT.md)
 - [MIT License](LICENSE)
 
-## Final Project Status
+## Project Status
 
-The repository contains the final documented project snapshot, including the source code, reports, demo guide, license and submission checklist. The live UI gracefully falls back to Demo Mode when the backend is temporarily unavailable, while automatically checking for API recovery.
+The repository contains the final documented project snapshot, including source code, reports, application documentation, licensing and submission material. The application uses the FastAPI service as its source of truth for forecast, inventory and evaluation results.
 
-For internship submission, keep personal or confidential documents such as offer letters, certificates, signatures, identity documents and private mentor correspondence outside this public repository unless the organization explicitly instructs otherwise.
+Personal or confidential documents such as offer letters, certificates, signatures, identity documents and private mentor correspondence should remain outside this public repository unless the organization explicitly requires them here.
