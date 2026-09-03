@@ -1,6 +1,23 @@
 # Foresight AI — Supply Intelligence
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-5f8cff.svg)](https://foresight-ai-6mlt.onrender.com)
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+
 **Foresight AI** is an AI-powered demand forecasting and inventory decision-support platform for SKU-level retail operations. It turns historical sales into forecasts, converts forecasts into replenishment decisions, and translates inventory risk into business impact in Indian Rupees (₹).
+
+> **ZIDIO Development Internship Project — Final Project Snapshot**
+
+**Copyright © 2026 Priyadarshan S V.** See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md).
+
+## 🚀 Live Demo
+
+**Live application:** https://foresight-ai-6mlt.onrender.com
+
+**Custom domain:** https://priyadarshan.tech *(verify DNS/hosting before using it as the primary submission URL)*
+
+**Repository:** https://github.com/darshxn10x/foresight-ai
 
 ## Why Foresight?
 
@@ -24,6 +41,7 @@ Retail teams often have to decide **how much stock to hold, when to reorder, and
 - Interactive Forecast, Inventory and AI Insights dashboard
 - **Ask Foresight** dashboard-aware chatbot for forecasts, inventory and business-impact questions
 - FastAPI scoring/evaluation backend with a static web frontend
+- Graceful **Demo Mode** fallback when the live API is temporarily unavailable
 
 ## Model Validation
 
@@ -60,7 +78,7 @@ The dashboard displays these values using **₹ / Indian number formatting** so 
 
 ## AI Assistant
 
-**Ask Foresight** is a no-API-key dashboard assistant. It reads the current dashboard state and can explain:
+**Ask Foresight** is a dashboard-aware assistant. It reads the current dashboard state and can explain:
 
 - Why the active SKU is at risk
 - Whether to reorder
@@ -117,7 +135,8 @@ Foresight AI Web Dashboard + AI Assistant
 - Joblib
 - HTML / CSS / JavaScript
 - Chart.js
-- Render deployment
+- Render
+- GitHub
 
 ## Project Structure
 
@@ -128,10 +147,23 @@ foresight-ai/
 ├── data/           # Sales and SKU master data
 ├── models/         # Trained forecasting artifacts
 ├── reports/        # Validation and project reports
+├── docs/           # Final demo and internship submission documentation
 ├── src/            # Data science / forecasting source code
 └── tests/          # Automated tests
 ```
 
-## Live Demo
+## Documentation
 
-The project is deployed as a public web application and the repository contains the complete source code required for review.
+- [ZIDIO Internship Project Report](reports/ZIDIO_PROJECT_REPORT.md)
+- [Data Quality Report](reports/data_quality_report.md)
+- [Model Evaluation Report](reports/model_evaluation_report.md)
+- [Final Submission Checklist](docs/FINAL_SUBMISSION_CHECKLIST.md)
+- [Final Demo Guide](docs/DEMO_GUIDE.md)
+- [Copyright Notice](COPYRIGHT.md)
+- [MIT License](LICENSE)
+
+## Final Project Status
+
+The repository contains the final documented project snapshot, including the source code, reports, demo guide, license and submission checklist. The live UI gracefully falls back to Demo Mode when the backend is temporarily unavailable, while automatically checking for API recovery.
+
+For internship submission, keep personal or confidential documents such as offer letters, certificates, signatures, identity documents and private mentor correspondence outside this public repository unless the organization explicitly instructs otherwise.
