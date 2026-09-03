@@ -20,10 +20,16 @@
             <a class="nav-item" href="#inventory"><span>◫</span>Inventory</a>
             <a class="nav-item" href="#insights"><span>✦</span>AI Insights</a>
         </nav>
-        <div class="sidebar-bottom"><div class="system-status"><div class="status-dot"></div><div><strong>System Online</strong><small>Forecast engine ready</small></div></div><div class="version">Foresight AI v1.0</div></div>
+        <div class="sidebar-bottom">
+            <div class="system-status" id="systemStatus">
+                <div class="status-dot"></div>
+                <div><strong id="systemStatusLabel">Checking system…</strong><small id="systemStatusDetail">Connecting to forecast engine</small></div>
+            </div>
+            <div class="version">Foresight AI v1.1</div>
+        </div>
     </aside>
     <main class="main" id="dashboard">
-        <header class="topbar"><div><div class="eyebrow">COMMAND CENTER</div><h2>Supply Intelligence Dashboard</h2></div><div class="top-actions"><div class="api-status"><span></span><b id="apiStatus">API CONNECTED</b></div><div class="user-badge">AI</div></div></header>
+        <header class="topbar"><div><div class="eyebrow">COMMAND CENTER</div><h2>Supply Intelligence Dashboard</h2></div><div class="top-actions"><div class="api-status"><span></span><b id="apiStatus">CHECKING API</b></div><div class="user-badge">AI</div></div></header>
         <section class="hero"><div class="hero-content"><div class="hero-tag">✦ AI-POWERED DEMAND PLANNING</div><h1>Predict demand.<br><span>Prevent stockouts.</span></h1><p>Turn historical sales data into intelligent forecasts and actionable inventory decisions.</p></div><div class="hero-visual"><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="chart-icon"><div></div><div></div><div></div></div></div></section>
         <section class="control-panel" id="forecast">
             <div class="section-heading"><div><div class="eyebrow">FORECAST ENGINE</div><h2>Generate Forecast</h2><p>Configure inventory parameters and run the AI prediction engine.</p></div><div class="ready-badge"><span></span>READY</div></div>
@@ -71,5 +77,6 @@
 <script src="app.js"></script>
 <script src="enhancements.js"></script>
 <script src="chatbot.js"></script>
+<script src="runtime.js"></script>
 </body>
 </html>
