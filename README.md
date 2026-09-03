@@ -15,7 +15,7 @@
 
 **Live application:** https://foresight-ai-6mlt.onrender.com
 
-**Custom domain:** https://priyadarshan.tech *(verify DNS/hosting before using it as the primary submission URL)*
+**Custom domain:** https://priyadarshan.tech
 
 **Repository:** https://github.com/darshxn10x/foresight-ai
 
