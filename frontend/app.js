@@ -3,7 +3,10 @@
 // ======================================================
 
 // IMPORTANT:
-// Your Render backend URL
+// Do NOT use markdown here.
+// Do NOT write [https://...](https://...)
+
+// Your FastAPI backend
 const API_BASE_URL = "https://foresight-ai-6mlt.onrender.com";
 
 let forecastChart = null;
@@ -51,40 +54,85 @@ const demandData = [
 
 
 // ======================================================
-// API REQUEST HELPER
+// DEMO FORECAST
+// ======================================================
+
+function getDemoForecast() {
+
+    return {
+        forecast: [
+            {
+                forecast_week: "2026-W36",
+                predicted_demand: 52,
+                model: "Seasonal Naive"
+            },
+            {
+                forecast_week: "2026-W37",
+                predicted_demand: 55,
+                model: "Seasonal Naive"
+            },
+            {
+                forecast_week: "2026-W38",
+                predicted_demand: 58,
+                model: "Seasonal Naive"
+            },
+            {
+                forecast_week: "2026-W39",
+                predicted_demand: 61,
+                model: "Seasonal Naive"
+            },
+            {
+                forecast_week: "2026-W40",
+                predicted_demand: 63,
+                model: "Seasonal Naive"
+            },
+            {
+                forecast_week: "2026-W41",
+                predicted_demand: 66,
+                model: "Seasonal Naive"
+            }
+        ]
+    };
+
+}
+
+
+// ======================================================
+// API HELPER
 // ======================================================
 
 async function apiRequest(endpoint, options = {}) {
 
-    const url = `${API_BASE_URL}${endpoint}`;
+    const controller = new AbortController();
 
-    console.log("API REQUEST:", url);
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, 15000);
 
-    const response = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
-        }
-    });
+    try {
 
-    if (!response.ok) {
-
-        let message = `API Error ${response.status}`;
-
-        try {
-            const errorData = await response.json();
-
-            if (errorData.detail) {
-                message += `: ${errorData.detail}`;
+        const response = await fetch(
+            `${API_BASE_URL}${endpoint}`,
+            {
+                ...options,
+                signal: controller.signal
             }
+        );
 
-        } catch (_) {}
+        if (!response.ok) {
+            throw new Error(
+                `API error: ${response.status}`
+            );
+        }
 
-        throw new Error(message);
+        return await response.json();
+
+    } finally {
+
+        clearTimeout(timeout);
+
     }
 
-    return response.json();
 }
 
 
@@ -94,16 +142,19 @@ async function apiRequest(endpoint, options = {}) {
 
 async function getForecast() {
 
-    return apiRequest("/forecast/predict", {
-
-        method: "POST",
-
-        body: JSON.stringify({
-            horizon_weeks: 6,
-            data: demandData
-        })
-
-    });
+    return await apiRequest(
+        "/forecast/predict",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                horizon_weeks: 6,
+                data: demandData
+            })
+        }
+    );
 
 }
 
@@ -120,25 +171,29 @@ async function getInventory(
     safetyStock
 ) {
 
-    return apiRequest("/inventory/analyze", {
+    return await apiRequest(
+        "/inventory/analyze",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
 
-        method: "POST",
+                sku_id: skuId,
 
-        body: JSON.stringify({
+                current_stock: currentStock,
 
-            sku_id: skuId,
+                predicted_demand:
+                    Math.round(predictedDemand),
 
-            current_stock: currentStock,
+                lead_time_days: leadTimeDays,
 
-            predicted_demand: Math.round(predictedDemand),
+                safety_stock: safetyStock
 
-            lead_time_days: leadTimeDays,
-
-            safety_stock: safetyStock
-
-        })
-
-    });
+            })
+        }
+    );
 
 }
 
@@ -149,23 +204,165 @@ async function getInventory(
 
 async function getInsights(inventory) {
 
-    return apiRequest("/insights/generate", {
+    return await apiRequest(
+        "/insights/generate",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
 
-        method: "POST",
+                sku_id: inventory.sku_id,
 
-        body: JSON.stringify({
+                current_stock:
+                    inventory.current_stock,
 
-            sku_id: inventory.sku_id,
+                predicted_demand:
+                    inventory.predicted_demand,
 
-            current_stock: inventory.current_stock,
+                safety_stock:
+                    inventory.safety_stock
 
-            predicted_demand: inventory.predicted_demand,
+            })
+        }
+    );
 
-            safety_stock: inventory.safety_stock
+}
 
-        })
 
-    });
+// ======================================================
+// DEMO INVENTORY FALLBACK
+// ======================================================
+
+function getDemoInventory(
+    skuId,
+    currentStock,
+    predictedDemand,
+    leadTimeDays,
+    safetyStock
+) {
+
+    const dailyDemand =
+        predictedDemand / 7;
+
+    const reorderPoint =
+        Math.ceil(
+            dailyDemand * leadTimeDays +
+            safetyStock
+        );
+
+    const recommendedOrder =
+        Math.max(
+            0,
+            Math.ceil(
+                predictedDemand +
+                safetyStock -
+                currentStock
+            )
+        );
+
+    let risk = "Healthy";
+
+    if (currentStock < safetyStock) {
+
+        risk = "Critical";
+
+    } else if (currentStock < reorderPoint) {
+
+        risk = "Warning";
+
+    }
+
+    return {
+
+        sku_id: skuId,
+
+        current_stock: currentStock,
+
+        predicted_demand:
+            Math.round(predictedDemand),
+
+        reorder_point: reorderPoint,
+
+        recommended_order:
+            recommendedOrder,
+
+        safety_stock: safetyStock,
+
+        risk: risk
+
+    };
+
+}
+
+
+// ======================================================
+// DEMO INSIGHT
+// ======================================================
+
+function getDemoInsight(inventory) {
+
+    let insight;
+    let action;
+
+    const stock =
+        Number(inventory.current_stock);
+
+    const demand =
+        Number(inventory.predicted_demand);
+
+    const reorder =
+        Number(inventory.reorder_point);
+
+    if (stock < reorder) {
+
+        insight =
+            `Inventory is below the recommended reorder point. ` +
+            `Projected demand is ${demand} units while available ` +
+            `stock is only ${stock} units.`;
+
+        action =
+            `Replenish approximately ${inventory.recommended_order} units ` +
+            `to maintain the required inventory buffer.`;
+
+    } else {
+
+        insight =
+            `Current inventory is sufficient for the upcoming forecast period. ` +
+            `Demand is projected at ${demand} units.`;
+
+        action =
+            "Continue monitoring demand and maintain the current safety-stock buffer.";
+
+    }
+
+    return {
+
+        insight: insight,
+
+        recommended_action: action
+
+    };
+
+}
+
+
+// ======================================================
+// UPDATE API STATUS
+// ======================================================
+
+function setApiStatus(connected) {
+
+    const status =
+        document.getElementById("apiStatus");
+
+    if (!status) return;
+
+    status.textContent =
+        connected
+            ? "API CONNECTED"
+            : "DEMO MODE";
 
 }
 
@@ -180,29 +377,27 @@ function updateDashboard(
     insightData
 ) {
 
-    // SKU
     document.getElementById("sku").textContent =
-        inventoryData.sku_id || "SKU001";
+        inventoryData.sku_id;
 
-
-    // STOCK
     document.getElementById("stock").textContent =
-        inventoryData.current_stock ?? "--";
+        `${inventoryData.current_stock} units`;
 
-
-    // DEMAND
     document.getElementById("demand").textContent =
-        inventoryData.predicted_demand ?? "--";
+        `${inventoryData.predicted_demand} units`;
 
 
-    // RISK
-    const riskElement = document.getElementById("risk");
+    const riskElement =
+        document.getElementById("risk");
 
     const risk =
-        String(inventoryData.risk || "unknown").toLowerCase();
+        String(inventoryData.risk || "healthy")
+            .toLowerCase();
+
 
     riskElement.textContent =
         risk.toUpperCase();
+
 
     riskElement.classList.remove(
         "risk-healthy",
@@ -210,101 +405,125 @@ function updateDashboard(
         "risk-critical"
     );
 
-    if (risk === "healthy") {
 
-        riskElement.classList.add("risk-healthy");
+    if (risk.includes("critical")) {
 
-        document.getElementById("riskDescription").textContent =
+        riskElement.classList.add(
+            "risk-critical"
+        );
+
+        document.getElementById(
+            "riskDescription"
+        ).textContent =
+            "Immediate replenishment required";
+
+    } else if (risk.includes("warning")) {
+
+        riskElement.classList.add(
+            "risk-warning"
+        );
+
+        document.getElementById(
+            "riskDescription"
+        ).textContent =
+            "Monitor inventory closely";
+
+    } else {
+
+        riskElement.classList.add(
+            "risk-healthy"
+        );
+
+        document.getElementById(
+            "riskDescription"
+        ).textContent =
             "Inventory level is healthy";
 
     }
 
-    else if (risk === "warning") {
 
-        riskElement.classList.add("risk-warning");
-
-        document.getElementById("riskDescription").textContent =
-            "Replenishment may be required";
-
-    }
-
-    else if (risk === "critical") {
-
-        riskElement.classList.add("risk-critical");
-
-        document.getElementById("riskDescription").textContent =
-            "Immediate replenishment recommended";
-
-    }
-
-    else {
-
-        document.getElementById("riskDescription").textContent =
-            "Risk assessment unavailable";
-
-    }
+    document.getElementById(
+        "reorderPoint"
+    ).textContent =
+        `${inventoryData.reorder_point} units`;
 
 
-    // INVENTORY METRICS
-    document.getElementById("reorderPoint").textContent =
-        inventoryData.reorder_point ?? "--";
-
-    document.getElementById("recommendedOrder").textContent =
-        inventoryData.recommended_order ?? "--";
-
-    document.getElementById("safetyStock").textContent =
-        inventoryData.safety_stock ?? "--";
+    document.getElementById(
+        "recommendedOrder"
+    ).textContent =
+        `${inventoryData.recommended_order} units`;
 
 
-    // AI INSIGHT
-    document.getElementById("insight").textContent =
-        insightData.insight ||
-        "AI analysis completed successfully.";
+    document.getElementById(
+        "safetyStock"
+    ).textContent =
+        `${inventoryData.safety_stock} units`;
 
 
-    // RECOMMENDATION
-    document.getElementById("recommendation").textContent =
-        insightData.recommended_action ||
-        "Review the forecast and inventory position.";
+    document.getElementById(
+        "insight"
+    ).textContent =
+        insightData.insight;
 
 
-    // MODEL
+    document.getElementById(
+        "recommendation"
+    ).textContent =
+        insightData.recommended_action;
+
+
     const model =
         forecastData.forecast?.[0]?.model ||
         "Seasonal Naive";
 
-    document.getElementById("forecastModel").textContent =
-        `MODEL: ${model}`;
+
+    document.getElementById(
+        "forecastModel"
+    ).textContent =
+        `MODEL: ${model.toUpperCase()}`;
 
 
-    // FORECAST LIST
-    const forecastList =
-        document.getElementById("forecastList");
+    renderForecastList(
+        forecastData
+    );
 
-    forecastList.innerHTML = "";
+}
 
-    if (
-        forecastData.forecast &&
-        forecastData.forecast.length
-    ) {
 
-        forecastData.forecast.forEach(item => {
+// ======================================================
+// FORECAST LIST
+// ======================================================
+
+function renderForecastList(forecastData) {
+
+    const list =
+        document.getElementById(
+            "forecastList"
+        );
+
+    list.innerHTML = "";
+
+
+    forecastData.forecast.forEach(
+        item => {
 
             const row =
                 document.createElement("div");
 
-            row.className = "forecast-row";
+            row.className =
+                "forecast-row";
+
 
             row.innerHTML = `
                 <span>${item.forecast_week}</span>
                 <strong>${item.predicted_demand} units</strong>
             `;
 
-            forecastList.appendChild(row);
 
-        });
+            list.appendChild(row);
 
-    }
+        }
+    );
 
 }
 
@@ -313,10 +532,14 @@ function updateDashboard(
 // CHART
 // ======================================================
 
-function renderForecastChart(forecastData) {
+function renderForecastChart(
+    forecastData
+) {
 
     const canvas =
-        document.getElementById("forecastChart");
+        document.getElementById(
+            "forecastChart"
+        );
 
     if (!canvas) return;
 
@@ -328,20 +551,21 @@ function renderForecastChart(forecastData) {
     }
 
 
-    // ------------------------------
-    // HISTORICAL WEEKLY DATA
-    // ------------------------------
+    const historicalMap = {};
 
-    const weeklyMap = {};
 
     demandData.forEach(item => {
 
-        const date = new Date(item.date);
+        const date =
+            new Date(item.date);
 
-        const day = date.getDay();
+        const day =
+            date.getDay();
 
         const diff =
-            day === 0 ? 0 : 7 - day;
+            day === 0
+                ? 0
+                : 7 - day;
 
         const weekEnd =
             new Date(date);
@@ -350,41 +574,37 @@ function renderForecastChart(forecastData) {
             date.getDate() + diff
         );
 
+
         const label =
-            weekEnd.toISOString().split("T")[0];
+            weekEnd
+                .toISOString()
+                .split("T")[0];
 
-        if (!weeklyMap[label]) {
-            weeklyMap[label] = 0;
-        }
 
-        weeklyMap[label] +=
+        historicalMap[label] =
+            (historicalMap[label] || 0) +
             Number(item.units_sold);
 
     });
 
 
     const historicalLabels =
-        Object.keys(weeklyMap);
+        Object.keys(historicalMap);
 
     const historicalValues =
-        Object.values(weeklyMap);
+        Object.values(historicalMap);
 
-
-    // ------------------------------
-    // FORECAST
-    // ------------------------------
-
-    const forecast =
-        forecastData.forecast || [];
 
     const forecastLabels =
-        forecast.map(
+        forecastData.forecast.map(
             item => item.forecast_week
         );
 
+
     const forecastValues =
-        forecast.map(
-            item => Number(item.predicted_demand)
+        forecastData.forecast.map(
+            item =>
+                Number(item.predicted_demand)
         );
 
 
@@ -394,168 +614,159 @@ function renderForecastChart(forecastData) {
     ];
 
 
-    const historicalDataset = [
-
+    const historicalPoints = [
         ...historicalValues,
-
         ...Array(
             forecastValues.length
         ).fill(null)
-
     ];
 
 
-    const forecastDataset = [
-
+    const forecastPoints = [
         ...Array(
             historicalValues.length
         ).fill(null),
-
         ...forecastValues
-
     ];
 
 
-    // ------------------------------
-    // CREATE CHART
-    // ------------------------------
-
     forecastChart =
-        new Chart(canvas, {
+        new Chart(
+            canvas,
+            {
 
-            type: "line",
+                type: "line",
 
-            data: {
+                data: {
 
-                labels,
+                    labels: labels,
 
-                datasets: [
+                    datasets: [
 
-                    {
-                        label: "Historical Demand",
+                        {
+                            label:
+                                "Historical Demand",
 
-                        data: historicalDataset,
+                            data:
+                                historicalPoints,
 
-                        borderColor: "#647cff",
+                            borderColor:
+                                "#6e88bb",
 
-                        backgroundColor:
-                            "rgba(100,124,255,.08)",
+                            backgroundColor:
+                                "rgba(110,136,187,.08)",
 
-                        borderWidth: 3,
+                            borderWidth: 2,
 
-                        pointRadius: 4,
+                            pointRadius: 3,
 
-                        pointHoverRadius: 6,
+                            tension: .35,
 
-                        tension: .35,
+                            fill: true
+                        },
 
-                        fill: true
+
+                        {
+                            label:
+                                "AI Predicted Demand",
+
+                            data:
+                                forecastPoints,
+
+                            borderColor:
+                                "#6e8cff",
+
+                            backgroundColor:
+                                "rgba(110,140,255,.08)",
+
+                            borderWidth: 3,
+
+                            borderDash:
+                                [7, 6],
+
+                            pointRadius: 4,
+
+                            tension: .35,
+
+                            fill: true
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        mode: "index",
+                        intersect: false
                     },
 
 
-                    {
-                        label: "AI Forecast",
+                    plugins: {
 
-                        data: forecastDataset,
+                        legend: {
 
-                        borderColor: "#45d7ff",
+                            labels: {
 
-                        backgroundColor:
-                            "rgba(69,215,255,.05)",
+                                color: "#899bb9",
 
-                        borderWidth: 3,
+                                font: {
+                                    size: 11
+                                },
 
-                        borderDash: [7, 6],
+                                usePointStyle: true
 
-                        pointRadius: 4,
+                            }
 
-                        pointHoverRadius: 6,
+                        }
 
-                        tension: .35,
-
-                        fill: false
-                    }
-
-                ]
-
-            },
+                    },
 
 
-            options: {
+                    scales: {
 
-                responsive: true,
+                        x: {
 
-                maintainAspectRatio: false,
-
-                interaction: {
-                    intersect: false,
-                    mode: "index"
-                },
-
-                plugins: {
-
-                    legend: {
-
-                        labels: {
-
-                            color: "#8994ab",
-
-                            font: {
-                                size: 10
+                            grid: {
+                                color:
+                                    "rgba(120,140,180,.07)"
                             },
 
-                            usePointStyle: true
-
-                        }
-
-                    }
-
-                },
-
-
-                scales: {
-
-                    x: {
-
-                        grid: {
-                            color: "rgba(255,255,255,.04)"
-                        },
-
-                        ticks: {
-                            color: "#68738a",
-                            font: {
-                                size: 9
+                            ticks: {
+                                color: "#627493"
                             }
-                        }
 
-                    },
-
-                    y: {
-
-                        beginAtZero: true,
-
-                        grid: {
-                            color: "rgba(255,255,255,.05)"
                         },
 
-                        ticks: {
-                            color: "#68738a",
-                            font: {
-                                size: 9
-                            }
-                        },
 
-                        title: {
+                        y: {
 
-                            display: true,
+                            beginAtZero: true,
 
-                            text: "UNITS / WEEK",
+                            grid: {
+                                color:
+                                    "rgba(120,140,180,.07)"
+                            },
 
-                            color: "#68738a",
+                            ticks: {
+                                color: "#627493"
+                            },
 
-                            font: {
-                                size: 9,
-                                weight: "700"
+                            title: {
+
+                                display: true,
+
+                                text:
+                                    "Units per Week",
+
+                                color: "#7184a4"
+
                             }
 
                         }
@@ -565,64 +776,76 @@ function renderForecastChart(forecastData) {
                 }
 
             }
-
-        });
+        );
 
 }
 
 
 // ======================================================
-// MAIN GENERATION FUNCTION
+// MAIN GENERATE FUNCTION
 // ======================================================
 
 async function initializeDashboard() {
 
     const button =
-        document.getElementById("generateBtn");
-
-    const originalText =
-        button.innerHTML;
+        document.getElementById(
+            "generateBtn"
+        );
 
 
     button.disabled = true;
 
     button.innerHTML =
-        "⟳  Analyzing demand...";
+        "⟳ Generating AI Forecast...";
 
 
     try {
 
         const skuId =
-            document.getElementById("skuInput")
+            document
+                .getElementById("skuInput")
                 .value
                 .trim();
 
+
         const currentStock =
             Number(
-                document.getElementById("stockInput")
+                document
+                    .getElementById(
+                        "stockInput"
+                    )
                     .value
             );
+
 
         const leadTimeDays =
             Number(
-                document.getElementById("leadTimeInput")
+                document
+                    .getElementById(
+                        "leadTimeInput"
+                    )
                     .value
             );
+
 
         const safetyStock =
             Number(
-                document.getElementById("safetyStockInput")
+                document
+                    .getElementById(
+                        "safetyStockInput"
+                    )
                     .value
             );
 
 
-        // ------------------------------
-        // VALIDATION
-        // ------------------------------
-
         if (!skuId) {
-            throw new Error("Please enter a SKU ID.");
+
+            throw new Error(
+                "SKU ID is required."
+            );
+
         }
+
 
         if (
             currentStock < 0 ||
@@ -637,67 +860,102 @@ async function initializeDashboard() {
         }
 
 
-        // ------------------------------
-        // FORECAST
-        // ------------------------------
+        // ------------------------------------------------
+        // TRY REAL FORECAST API
+        // ------------------------------------------------
 
-        const forecastData =
-            await getForecast();
+        let forecastData;
+        let inventoryData;
+        let insightData;
+
+        let realApi = true;
 
 
-        if (
-            !forecastData.forecast ||
-            !forecastData.forecast.length
-        ) {
+        try {
 
-            throw new Error(
-                "Forecast engine returned no predictions."
+            forecastData =
+                await getForecast();
+
+
+            if (
+                !forecastData.forecast ||
+                !forecastData.forecast.length
+            ) {
+
+                throw new Error(
+                    "Empty forecast response"
+                );
+
+            }
+
+
+            const predictedDemand =
+                forecastData
+                    .forecast[0]
+                    .predicted_demand;
+
+
+            inventoryData =
+                await getInventory(
+                    skuId,
+                    currentStock,
+                    predictedDemand,
+                    leadTimeDays,
+                    safetyStock
+                );
+
+
+            insightData =
+                await getInsights(
+                    inventoryData
+                );
+
+
+        } catch (apiError) {
+
+            console.warn(
+                "Backend unavailable. Using demo mode.",
+                apiError
             );
+
+
+            realApi = false;
+
+
+            // --------------------------------------------
+            // FALLBACK DEMO DATA
+            // --------------------------------------------
+
+            forecastData =
+                getDemoForecast();
+
+
+            const predictedDemand =
+                forecastData
+                    .forecast[0]
+                    .predicted_demand;
+
+
+            inventoryData =
+                getDemoInventory(
+                    skuId,
+                    currentStock,
+                    predictedDemand,
+                    leadTimeDays,
+                    safetyStock
+                );
+
+
+            insightData =
+                getDemoInsight(
+                    inventoryData
+                );
 
         }
 
 
-        const predictedDemand =
-            Number(
-                forecastData
-                    .forecast[0]
-                    .predicted_demand
-            );
+        setApiStatus(realApi);
 
-
-        // ------------------------------
-        // INVENTORY
-        // ------------------------------
-
-        const inventoryData =
-            await getInventory(
-
-                skuId,
-
-                currentStock,
-
-                predictedDemand,
-
-                leadTimeDays,
-
-                safetyStock
-
-            );
-
-
-        // ------------------------------
-        // AI INSIGHTS
-        // ------------------------------
-
-        const insightData =
-            await getInsights(
-                inventoryData
-            );
-
-
-        // ------------------------------
-        // UI
-        // ------------------------------
 
         updateDashboard(
             forecastData,
@@ -711,42 +969,29 @@ async function initializeDashboard() {
         );
 
 
-        console.log(
-            "FORESIGHT AI SUCCESS",
-            {
-                forecastData,
-                inventoryData,
-                insightData
-            }
-        );
+    } catch (error) {
+
+        console.error(error);
 
 
-    }
-
-    catch (error) {
-
-        console.error(
-            "FORESIGHT AI ERROR:",
-            error
-        );
+        document.getElementById(
+            "insight"
+        ).textContent =
+            error.message;
 
 
-        document.getElementById("insight").textContent =
-            `Unable to complete analysis: ${error.message}`;
+        document.getElementById(
+            "recommendation"
+        ).textContent =
+            "Please check the inventory inputs.";
 
 
-        document.getElementById("recommendation").textContent =
-            "Check that the Render API is running and that CORS is enabled on the FastAPI backend.";
-
-    }
-
-
-    finally {
+    } finally {
 
         button.disabled = false;
 
         button.innerHTML =
-            originalText;
+            `✦ Generate AI Forecast <span>→</span>`;
 
     }
 
@@ -754,7 +999,7 @@ async function initializeDashboard() {
 
 
 // ======================================================
-// EVENTS
+// BUTTON
 // ======================================================
 
 document
@@ -765,40 +1010,42 @@ document
     );
 
 
-document
-    .querySelectorAll("input")
-    .forEach(input => {
-
-        input.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Enter"
-                ) {
-
-                    initializeDashboard();
-
-                }
-
-            }
-        );
-
-    });
-
-
 // ======================================================
-// INITIAL STATE
+// ENTER KEY
 // ======================================================
 
-// Don't automatically spam the backend on page load.
-// User clicks Generate Forecast.
+document.addEventListener(
+    "keydown",
+    event => {
 
-console.log(
-    "Foresight AI frontend loaded."
+        if (
+            event.key === "Enter" &&
+            !event.target.matches("input")
+        ) {
+
+            initializeDashboard();
+
+        }
+
+    }
 );
 
-console.log(
-    "Backend:",
-    API_BASE_URL
+
+// ======================================================
+// INITIAL LOAD
+// ======================================================
+
+window.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        // Don't immediately hammer the backend.
+        // Show the dashboard first.
+
+        setTimeout(
+            initializeDashboard,
+            500
+        );
+
+    }
 );
