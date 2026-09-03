@@ -17,7 +17,7 @@ The ZIDIO engagement brief defines seven core deliverables (D1–D7):
 - [x] **D6 — Deployed scoring service:** FastAPI backend deployed at `https://foresight-ai-6mlt.onrender.com`.
 - [x] **D7 — Executive readout:** `reports/EXECUTIVE_READOUT.md` plus the downloadable 8-slide PPTX prepared for submission.
 
-The brief defines the submission marks as repository/notebooks, dashboard/deployment, executive readout, and a 3–5 minute demo video. fileciteturn193file1L40-L60
+The brief defines the submission marks as repository/notebooks, dashboard/deployment, executive readout, and a 3–5 minute demo video.
 
 ## 2. Submission items explicitly required by the brief
 
