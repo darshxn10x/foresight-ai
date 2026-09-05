@@ -2,7 +2,7 @@
 
 Foresight AI is a demand forecasting and inventory decision-support platform for SKU-level retail operations. It combines time-series forecasting with inventory rules to turn sales history into practical replenishment decisions and business-impact metrics.
 
-**Live application:** https://priyadarshan.tech  
+**Live application:** foresight-ai-supply-intelligence.priyadarshan.tech  
 **Repository:** https://github.com/darshxn10x/foresight-ai
 
 ## Overview
