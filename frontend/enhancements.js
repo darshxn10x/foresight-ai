@@ -2,7 +2,18 @@
 (function () {
   "use strict";
 
-  const API = window.location.origin;
+  // Same-origin is preferred (frontend + API are one Render service), but
+  // fall back to the production origin so this still works if the page is
+  // ever served from elsewhere (e.g. a static host or local file preview).
+  const PRODUCTION_ORIGIN = "https://foresight.priyadarshan.tech";
+  const API_TIMEOUT_MS = 60000;
+  function getApiCandidates() {
+    const candidates = [];
+    const sameOrigin = window.location.origin;
+    if (sameOrigin && sameOrigin !== "null") candidates.push(sameOrigin);
+    candidates.push(PRODUCTION_ORIGIN);
+    return [...new Set(candidates.filter(Boolean).map(url => url.replace(/\/$/, "")))];
+  }
   const SKU_MASTER = "https://raw.githubusercontent.com/darshxn10x/foresight-ai/main/data/raw/sku_master.csv";
 
   const set = (id, value) => {
@@ -78,20 +89,34 @@
 
     const prices = await getPrices(sku);
     let server = null;
-    try {
-      const response = await fetch(`${API}/inventory/analyze?v=${Date.now()}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sku_id: sku,
-          current_stock: stock,
-          predicted_demand: Math.round(demand),
-          lead_time_days: Number(document.getElementById("leadTimeInput")?.value || 7),
-          safety_stock: Number(document.getElementById("safetyStockInput")?.value || 10)
-        })
-      });
-      if (response.ok) server = await response.json();
-    } catch (error) {}
+    const payload = JSON.stringify({
+      sku_id: sku,
+      current_stock: stock,
+      predicted_demand: Math.round(demand),
+      lead_time_days: Number(document.getElementById("leadTimeInput")?.value || 7),
+      safety_stock: Number(document.getElementById("safetyStockInput")?.value || 10)
+    });
+    for (const api of getApiCandidates()) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+      try {
+        const response = await fetch(`${api}/inventory/analyze?v=${Date.now()}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          cache: "no-store",
+          signal: controller.signal
+        });
+        if (response.ok) {
+          server = await response.json();
+          break;
+        }
+      } catch (error) {
+        console.warn(`inventory/analyze failed for ${api}:`, error);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
     const salesAtRisk = Number.isFinite(Number(server?.sales_at_risk))
       ? Number(server.sales_at_risk)

@@ -5,7 +5,12 @@
   // Production is served from the custom domain. The FastAPI service exposes
   // both the dashboard and API, so API calls should stay same-origin.
   const PRODUCTION_ORIGIN = "https://foresight.priyadarshan.tech";
-  const HEALTH_TIMEOUT_MS = 30000;
+  // Render's free plan spins the service down after inactivity; a cold start
+  // can take 40-60s+. Keep this in step with app.js's API_TIMEOUT_MS so the
+  // status badge doesn't report "unavailable" while the backend is simply
+  // waking up. A couple of retries give the instance time to finish booting.
+  const HEALTH_TIMEOUT_MS = 60000;
+  const HEALTH_RETRIES = 2;
 
   function getApiCandidates() {
     const candidates = [];
@@ -102,20 +107,23 @@
 
   async function checkBackend() {
     for (const api of getApiCandidates()) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
-      try {
-        const response = await fetch(`${api}/health?v=${Date.now()}`, {
-          cache: "no-store",
-          signal: controller.signal
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        updateStatus("online", "Forecast engine connected");
-        return true;
-      } catch (error) {
-        console.warn(`Health check failed for ${api}:`, error);
-      } finally {
-        clearTimeout(timer);
+      for (let attempt = 0; attempt <= HEALTH_RETRIES; attempt += 1) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+        try {
+          if (attempt > 0) updateStatus("checking", "Waking up forecast engine…");
+          const response = await fetch(`${api}/health?v=${Date.now()}`, {
+            cache: "no-store",
+            signal: controller.signal
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          updateStatus("online", "Forecast engine connected");
+          return true;
+        } catch (error) {
+          console.warn(`Health check failed for ${api} (attempt ${attempt + 1}):`, error);
+        } finally {
+          clearTimeout(timer);
+        }
       }
     }
 
