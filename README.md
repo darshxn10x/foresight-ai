@@ -16,7 +16,7 @@ Foresight connects the planning workflow:
 - SKU-level weekly demand forecasting
 - Random Forest forecasting with trend and lag features
 - Seasonal Naive and trend fallback methods for limited data
-- Time-aware holdout evaluation with MAE, RMSE and MAPE
+- Rolling-origin, one-step-ahead evaluation with MAE, RMSE and MAPE
 - Reorder-point and replenishment recommendations
 - Stockout, overstock and watch-state detection
 - Sales-at-risk and excess-inventory calculations
@@ -31,7 +31,7 @@ The forecasting service aggregates daily sales into weekly demand, removes incom
 
 For sufficient history, the current implementation uses a `RandomForestRegressor`. With limited history it falls back to a hybrid trend/seasonal approach so the dashboard remains usable without pretending that insufficient data supports a complex model.
 
-The API also returns a simple out-of-sample evaluation for the active SKU using MAE, RMSE and MAPE where available.
+The API also returns live rolling-origin, out-of-sample evaluation for the active SKU. It reports the number of validation folds and available MAE, RMSE, and MAPE so short histories are represented honestly rather than replaced with static metrics.
 
 ## Inventory Decision Engine
 

@@ -69,7 +69,10 @@
       safety: numeric("safetyStock"), risk: value("risk"),
       salesRisk: value("salesRisk"), overstock: value("overstockCapital"),
       reorderCost: value("reorderCost"), revenueRisk: value("protectedRevenue"),
-      model: value("forecastModel"), forecastRows
+      model: value("forecastModel"),
+      validation: value("modelPerformance"),
+      validationDetail: value("modelPerformanceDetail"),
+      forecastRows
     };
   }
 
@@ -86,7 +89,7 @@
     }
 
     if (q.includes("accurate") || q.includes("accuracy") || q.includes("model") || q.includes("wape") || q.includes("validation")) {
-      return `Model validation:\n\nLightGBM Regressor WAPE: 11.12%\nSeasonal Naive WAPE: 13.68%\nRelative improvement: 18.7%\nBias: +3.17%\nMAPE: 10.48%\nValidation: 4-fold rolling-origin across 195 SKUs.\n\nLower WAPE is better here, and the production model beats the seasonal-naive baseline without random time-series splitting.`;
+      return `Model validation for ${d.sku}:\n\n${d.validation}\n${d.validationDetail}\n\nThese are live out-of-sample metrics for the current history. Lower MAE, RMSE, and MAPE indicate closer forecasts.`;
     }
 
     if (q.includes("forecast") || q.includes("demand") || q.includes("next six") || q.includes("6-week")) {

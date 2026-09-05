@@ -372,60 +372,58 @@ def calculate_mape(actual, predicted):
     )
 
 
-def evaluate_forecast(history: List[float]):
-    """
-    Perform a simple holdout evaluation.
+MIN_EVALUATION_TRAINING_WEEKS = 2
 
-    The final observation is treated as unseen demand.
-    The model forecasts it using all previous observations.
+
+def evaluate_forecast(
+    history: List[float],
+    current_model: str | None = None
+):
+    """Evaluate one-week forecasts with expanding-window validation.
+
+    Each validation point is predicted using only the demand observed before it.
+    Starting with two training weeks makes the evaluation available for the
+    dashboard's four-week history while returning the number of out-of-sample
+    folds used to calculate the metrics.
     """
 
-    if len(history) < 5:
+    history = [float(value) for value in history]
+    history_weeks = len(history)
+
+    if history_weeks <= MIN_EVALUATION_TRAINING_WEEKS:
         return {
             "available": False,
-            "message": (
-                "Not enough historical data for reliable "
-                "forecast evaluation."
-            )
+            "method": "rolling_origin_one_step",
+            "history_weeks": history_weeks,
+            "required_weeks": MIN_EVALUATION_TRAINING_WEEKS + 1,
+            "message": "At least three complete weekly observations are required for validation."
         }
 
-    train = history[:-1]
-    actual = [history[-1]]
+    actual = []
+    predicted = []
+    evaluated_models = []
 
-    predictions, model_name = generate_forecast(
-        train,
-        1
-    )
+    for cutoff in range(MIN_EVALUATION_TRAINING_WEEKS, history_weeks):
+        forecast, model_name = generate_forecast(history[:cutoff], 1)
+        actual.append(history[cutoff])
+        predicted.append(forecast[0])
+        evaluated_models.append(model_name)
 
-    predicted = predictions[0]
-
-    mae = mean_absolute_error(
-        actual,
-        [predicted]
-    )
-
-    rmse = np.sqrt(
-        mean_squared_error(
-            actual,
-            [predicted]
-        )
-    )
-
-    mape = calculate_mape(
-        actual,
-        [predicted]
-    )
+    mae = mean_absolute_error(actual, predicted)
+    rmse = np.sqrt(mean_squared_error(actual, predicted))
+    mape = calculate_mape(actual, predicted)
 
     return {
         "available": True,
-        "model": model_name,
+        "method": "rolling_origin_one_step",
+        "model": current_model or evaluated_models[-1],
+        "evaluated_models": sorted(set(evaluated_models)),
+        "history_weeks": history_weeks,
+        "validated_folds": len(actual),
+        "limited_history": history_weeks < 8,
         "mae": round(float(mae), 2),
         "rmse": round(float(rmse), 2),
-        "mape": (
-            round(float(mape), 2)
-            if mape is not None
-            else None
-        )
+        "mape": round(float(mape), 2) if mape is not None else None
     }
 # ==========================================================
 # Forecast API
@@ -506,18 +504,21 @@ def predict_forecast(
         )
         if not history:
             continue
-        evaluation = evaluate_forecast(history)
-        evaluations.append({
-           "sku_id": sku_id,
-           **evaluation
-   })
-
         horizon = request.horizon_weeks
 
         predictions, model_name = generate_forecast(
             history,
             horizon
         )
+
+        evaluation = evaluate_forecast(
+            history,
+            current_model=model_name
+        )
+        evaluations.append({
+            "sku_id": sku_id,
+            **evaluation
+        })
 
         last_date = sku_data["date"].max()
 

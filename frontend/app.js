@@ -105,6 +105,39 @@ function setApiStatus(state) {
     }
 }
 
+function formatModelName(model) {
+    const names = {
+        hybrid_trend_seasonal: "Hybrid trend + seasonal",
+        random_forest: "Random Forest",
+        trend_fallback: "Trend"
+    };
+    return names[model] || String(model || "—").replace(/_/g, " ");
+}
+
+function formatMetric(value, suffix = "") {
+    const numericValue = Number(value);
+    return value !== null && value !== undefined && value !== "" && Number.isFinite(numericValue)
+        ? `${numericValue.toFixed(2)}${suffix}`
+        : "N/A";
+}
+
+function renderEvaluation(evaluation) {
+    const performance = document.getElementById("modelPerformance");
+    const detail = document.getElementById("modelPerformanceDetail");
+    if (!performance || !detail) return;
+
+    if (!evaluation?.available) {
+        performance.textContent = evaluation?.message || "Validation will be available after more complete weekly history is received.";
+        detail.textContent = "Rolling-origin, one-step-ahead validation · MAE / RMSE / MAPE";
+        return;
+    }
+
+    performance.textContent = `${formatModelName(evaluation.model)} · MAE ${formatMetric(evaluation.mae)} · RMSE ${formatMetric(evaluation.rmse)} · MAPE ${formatMetric(evaluation.mape, "%")}`;
+    const folds = evaluation.validated_folds;
+    const history = evaluation.history_weeks;
+    detail.textContent = `Rolling-origin, one-step-ahead · ${folds} out-of-sample ${folds === 1 ? "fold" : "folds"} · ${history} weekly observations${evaluation.limited_history ? " · Short history" : ""}`;
+}
+
 function updateDashboard(forecastData, inventoryData, insightData) {
     document.getElementById("sku").textContent = inventoryData.sku_id;
     document.getElementById("stock").textContent = `${inventoryData.current_stock} units`;
@@ -134,9 +167,7 @@ function updateDashboard(forecastData, inventoryData, insightData) {
     if (decisionReason) decisionReason.textContent = inventoryData.recommendation || "Analysis completed.";
     const model = forecastData.forecast?.[0]?.model || "—";
     document.getElementById("forecastModel").textContent = `MODEL: ${model.toUpperCase()}`;
-    const evaluation = forecastData.evaluation?.[0];
-    const modelPerformance = document.getElementById("modelPerformance");
-    if (modelPerformance && evaluation?.available) modelPerformance.textContent = `${evaluation.model} · MAE ${evaluation.mae} · RMSE ${evaluation.rmse} · MAPE ${evaluation.mape ?? "—"}%`;
+    renderEvaluation(forecastData.evaluation?.[0]);
     const salesRisk = document.getElementById("salesRisk");
     const overstockCapital = document.getElementById("overstockCapital");
     if (salesRisk) salesRisk.textContent = inventoryData.shortage_units ?? 0;

@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const API = "https://foresight-ai-6mlt.onrender.com";
+  const API = window.location.origin;
   const SKU_MASTER = "https://raw.githubusercontent.com/darshxn10x/foresight-ai/main/data/raw/sku_master.csv";
 
   const set = (id, value) => {
@@ -113,29 +113,6 @@
     return true;
   }
 
-  async function updateValidation() {
-    try {
-      const response = await fetch(`${API}/evaluation/summary?v=${Date.now()}`, { cache: "no-store" });
-      if (!response.ok) throw new Error();
-      const data = await response.json();
-      if (!data.available) throw new Error(data.message || "Evaluation unavailable");
-
-      const status = data.beats_baseline
-        ? `✓ Beats Seasonal Naive by ${data.improvement_pct}%`
-        : "Seasonal Naive currently stronger";
-
-      set("modelPerformance", `${data.production_model} · WAPE ${data.production_wape}% vs Seasonal Naive ${data.seasonal_naive_wape}% · ${status}`);
-      const detail = document.querySelector(".impact-card:first-child p");
-      if (detail) detail.textContent = `Rolling-origin · ${data.validated_folds} folds · WAPE primary · Bias ${data.production_bias}% · MAPE ${data.production_mape}%`;
-      return true;
-    } catch (error) {
-      set("modelPerformance", "Evaluation unavailable");
-      const detail = document.querySelector(".impact-card:first-child p");
-      if (detail) detail.textContent = "Connect to the forecast service to view current validation metrics.";
-      return false;
-    }
-  }
-
   function injectStyles() {
     if (document.getElementById("foresightEnhancementStyles")) return;
     const style = document.createElement("style");
@@ -173,7 +150,7 @@
       <div class="impact-card zidio-impact-card">
         <span class="impact-kicker">MODEL VALIDATION</span>
         <h3 id="modelPerformance">Evaluating model performance...</h3>
-        <p>Rolling-origin validation · WAPE primary · Bias + MAPE</p>
+        <p id="modelPerformanceDetail">Rolling-origin, one-step-ahead validation · MAE / RMSE / MAPE</p>
       </div>
       <div class="impact-card zidio-impact-card">
         <span class="impact-kicker">SALES AT RISK</span>
@@ -265,7 +242,6 @@
   async function refresh() {
     updateDecision();
     await updateBusinessImpact();
-    await updateValidation();
     updateDecision();
   }
 
